@@ -1,48 +1,36 @@
 /* ═══════════════════════════════════════════════════════════
-   Clothing Showcaseinator — Web Edition
-   Ported from the original Go/Fyne desktop app by mathew1521
+   Clothing Showcaseinator — Web Edition (Region-Fill Mode)
+   Custom template compatible — Nocturne Designs
    ═══════════════════════════════════════════════════════════ */
 
-/* ── Config (edit freely — make it yours!) ─────────────── */
+/* ── Config ────────────────────────────────────────────── */
 const CONFIG = {
   saveFilename: 'showcase.png',
 };
 
-/* ── Coordinate map (1:1 port from the Go source) ──────── */
-/* Key = "R,G,B" of the anchor color in template.png       */
-/* Each entry: { type, sx, sy, ox, oy, w }                 */
-/*   type = 'shirt' | 'pants'                              */
-/*   sx,sy = source top-left in the clothing PNG           */
-/*   ox,oy = offset from the anchor pixel                  */
-/*   w     = width (height is always 128)                  */
-const COORDS = {
-  '255,0,0': [ // RED
-    { type: 'pants', sx: 151, sy: 355, ox: 0,   oy: 128, w: 64  },
-    { type: 'shirt', sx: 151, sy: 355, ox: 0,   oy: 0,   w: 64  },
-  ],
-  '0,255,0': [ // GREEN
-    { type: 'pants', sx: 217, sy: 355, ox: 64,  oy: 128, w: 64  },
-    { type: 'pants', sx: 231, sy: 74,  ox: 64,  oy: 0,   w: 128 },
-    { type: 'pants', sx: 308, sy: 355, ox: 128, oy: 128, w: 64  },
-    { type: 'shirt', sx: 217, sy: 355, ox: 0,   oy: 0,   w: 64  },
-    { type: 'shirt', sx: 231, sy: 74,  ox: 64,  oy: 0,   w: 128 },
-    { type: 'shirt', sx: 308, sy: 355, ox: 192, oy: 0,   w: 64  },
-  ],
-  '0,0,255': [ // BLUE
-    { type: 'pants', sx: 440, sy: 355, ox: 64,  oy: 128, w: 64  },
-    { type: 'pants', sx: 427, sy: 74,  ox: 64,  oy: 0,   w: 128 },
-    { type: 'pants', sx: 85,  sy: 355, ox: 128, oy: 128, w: 64  },
-    { type: 'shirt', sx: 440, sy: 355, ox: 0,   oy: 0,   w: 64  },
-    { type: 'shirt', sx: 427, sy: 74,  ox: 64,  oy: 0,   w: 128 },
-    { type: 'shirt', sx: 85,  sy: 355, ox: 192, oy: 0,   w: 64  },
-  ],
-  '255,255,0': [ // YELLOW
-    { type: 'pants', sx: 374, sy: 355, ox: 0,   oy: 128, w: 64  },
-    { type: 'shirt', sx: 374, sy: 355, ox: 0,   oy: 0,   w: 64  },
-  ],
+/* ── Region-fill map ───────────────────────────────────────
+   Keys   = exact "R,G,B" of a color in your template.png
+   Values = crop region { x, y, w, h } from the uploaded
+            clothing image that should fill that shape.
+   ────────────────────────────────────────────────────────── */
+const REGION_MAP = {
+  '255,0,0': {        // 🔴 RED — left arm
+    shirt: { x: 151, y: 355, w: 64,  h: 128 },
+    pants: { x: 151, y: 355, w: 64,  h: 128 },
+  },
+  '0,255,0': {        // 🟢 GREEN — front torso (T-shape)
+    shirt: { x: 231, y: 74,  w: 128, h: 128 },
+    pants: { x: 231, y: 74,  w: 128, h: 128 },
+  },
+  '0,0,255': {        // 🔵 BLUE — back torso (T-shape)
+    shirt: { x: 427, y: 74,  w: 128, h: 128 },
+    pants: { x: 427, y: 74,  w: 128, h: 128 },
+  },
+  '255,255,0': {      // 🟡 YELLOW — right arm
+    shirt: { x: 374, y: 355, w: 64,  h: 128 },
+    pants: { x: 374, y: 355, w: 64,  h: 128 },
+  },
 };
-
-const CLOTHING_HEIGHT = 128;
 
 /* ── State ─────────────────────────────────────────────── */
 const state = {
@@ -54,10 +42,10 @@ const state = {
 };
 
 /* ── DOM refs ──────────────────────────────────────────── */
-const preview      = document.getElementById('preview');
-const dropOverlay  = document.getElementById('drop-overlay');
-const modal        = document.getElementById('modal');
-const modalName    = document.getElementById('modal-filename');
+const preview     = document.getElementById('preview');
+const dropOverlay = document.getElementById('drop-overlay');
+const modal       = document.getElementById('modal');
+const modalName   = document.getElementById('modal-filename');
 
 /* ── Image helpers ─────────────────────────────────────── */
 
@@ -93,10 +81,10 @@ function imageToCanvas(img) {
   return c;
 }
 
-/* ── Core generation (mirrors generateShowcase() in Go) ── */
+/* ── Core generation ───────────────────────────────────── */
 
 function generateShowcase() {
-  // Empty state → show outline (or blank)
+  /* Empty state → show outline */
   if (!state.shirt && !state.pants && !state.background) {
     if (state.outline) return imageToCanvas(state.outline);
     const blank = document.createElement('canvas');
@@ -104,7 +92,9 @@ function generateShowcase() {
     return blank;
   }
 
+  /* No template → fall back to outline or blank */
   if (!state.template) {
+    if (state.outline) return imageToCanvas(state.outline);
     const blank = document.createElement('canvas');
     blank.width = 700; blank.height = 450;
     return blank;
@@ -119,55 +109,83 @@ function generateShowcase() {
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
 
-  /* 1. Stretched background */
-  let bgCanvas = null;
+  /* 1. Stretch background across the whole canvas */
   if (state.background) {
-    bgCanvas = document.createElement('canvas');
-    bgCanvas.width  = W;
-    bgCanvas.height = H;
-    const bgCtx = bgCanvas.getContext('2d');
-    bgCtx.imageSmoothingEnabled = false;
-    bgCtx.drawImage(state.background.img, 0, 0, W, H);
-    ctx.drawImage(bgCanvas, 0, 0);
+    ctx.drawImage(state.background.img, 0, 0, W, H);
   }
 
-  /* 2. Template overlay */
-  ctx.drawImage(state.template, 0, 0);
+  /* 2. Rasterize the template so we can read its pixels */
+  const tmplCanvas = document.createElement('canvas');
+  tmplCanvas.width  = W;
+  tmplCanvas.height = H;
+  const tmplCtx = tmplCanvas.getContext('2d');
+  tmplCtx.imageSmoothingEnabled = false;
+  tmplCtx.drawImage(state.template, 0, 0);
+  const tmplData = tmplCtx.getImageData(0, 0, W, H).data;
 
-  /* 3. Scan for anchor pixels */
-  const data    = ctx.getImageData(0, 0, W, H).data;
-  const anchors = [];
+  /* 3. For each color, build a mask, then fill it */
+  for (const [colorKey, mapping] of Object.entries(REGION_MAP)) {
+    const maskCanvas = document.createElement('canvas');
+    maskCanvas.width  = W;
+    maskCanvas.height = H;
+    const maskCtx = maskCanvas.getContext('2d');
+    const maskImg = maskCtx.createImageData(W, H);
 
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      const i = (y * W + x) * 4;
-      if (data[i + 3] === 0) continue; // transparent
-      const key = `${data[i]},${data[i + 1]},${data[i + 2]}`;
-      if (COORDS[key]) anchors.push({ x, y, coords: COORDS[key] });
+    let minX = W, minY = H, maxX = -1, maxY = -1;
+    let found = false;
+
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const i = (y * W + x) * 4;
+        if (tmplData[i + 3] === 0) continue; // transparent
+        const key = `${tmplData[i]},${tmplData[i + 1]},${tmplData[i + 2]}`;
+        if (key !== colorKey) continue;
+
+        maskImg.data[i]     = 255;
+        maskImg.data[i + 1] = 255;
+        maskImg.data[i + 2] = 255;
+        maskImg.data[i + 3] = 255;
+
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+        found = true;
+      }
     }
-  }
 
-  /* 4. Erase + stamp for each anchor */
-  for (const anchor of anchors) {
-    for (const c of anchor.coords) {
-      const dx = anchor.x + c.ox;
-      const dy = anchor.y + c.oy;
+    if (!found) continue; // this color isn't in the template
 
-      // Erase the region (fill with background or clear)
-      if (bgCanvas) {
-        ctx.drawImage(bgCanvas, dx, dy, c.w, CLOTHING_HEIGHT,
-                                dx, dy, c.w, CLOTHING_HEIGHT);
-      } else {
-        ctx.clearRect(dx, dy, c.w, CLOTHING_HEIGHT);
-      }
+    maskCtx.putImageData(maskImg, 0, 0);
 
-      // Stamp the clothing region on top
-      const item = c.type === 'shirt' ? state.shirt : state.pants;
-      if (item) {
-        ctx.drawImage(item.img,
-                      c.sx, c.sy, c.w, CLOTHING_HEIGHT,
-                      dx,   dy,   c.w, CLOTHING_HEIGHT);
-      }
+    const bboxW = maxX - minX + 1;
+    const bboxH = maxY - minY + 1;
+
+    /* Draw shirt AND pants into the region */
+    for (const type of ['shirt', 'pants']) {
+      const item = state[type];
+      if (!item) continue;
+      const src = mapping[type];
+      if (!src) continue;
+
+      /* Texture layer: crop from clothing image, stretch to bbox */
+      const texCanvas = document.createElement('canvas');
+      texCanvas.width  = W;
+      texCanvas.height = H;
+      const texCtx = texCanvas.getContext('2d');
+      texCtx.imageSmoothingEnabled = false;
+      texCtx.drawImage(
+        item.img,
+        src.x, src.y, src.w, src.h,   // source crop
+        minX,  minY,  bboxW, bboxH    // destination (stretched)
+      );
+
+      /* Clip to mask shape */
+      texCtx.globalCompositeOperation = 'destination-in';
+      texCtx.drawImage(maskCanvas, 0, 0);
+
+      /* Composite onto the main canvas */
+      ctx.drawImage(texCanvas, 0, 0);
     }
   }
 
@@ -192,13 +210,14 @@ function refresh() {
 function setItem(kind, img, name) {
   state[kind] = { img, name };
   const label = document.getElementById(`${kind}-filename`);
-  label.textContent = name;
+  if (label) label.textContent = name;
   refresh();
 }
 
 function clearItem(kind) {
   state[kind] = null;
-  document.getElementById(`${kind}-filename`).textContent = '';
+  const label = document.getElementById(`${kind}-filename`);
+  if (label) label.textContent = '';
   refresh();
 }
 
@@ -215,7 +234,9 @@ document.querySelectorAll('[data-clear]').forEach(btn => {
 });
 
 ['shirt', 'pants', 'background'].forEach(kind => {
-  document.getElementById(`${kind}-input`).addEventListener('change', async e => {
+  const input = document.getElementById(`${kind}-input`);
+  if (!input) return;
+  input.addEventListener('change', async e => {
     const file = e.target.files[0];
     if (!file) return;
     try {
@@ -224,25 +245,28 @@ document.querySelectorAll('[data-clear]').forEach(btn => {
     } catch (err) {
       alert(err.message);
     }
-    e.target.value = ''; // reset so same file can be re-selected
+    e.target.value = ''; // allow re-selecting same file
   });
 });
 
 /* ── Save ──────────────────────────────────────────────── */
 
-document.getElementById('save').addEventListener('click', () => {
-  const result = generateShowcase();
-  result.toBlob(blob => {
-    const url = URL.createObjectURL(blob);
-    const a   = document.createElement('a');
-    a.href     = url;
-    a.download = CONFIG.saveFilename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }, 'image/png');
-});
+const saveBtn = document.getElementById('save');
+if (saveBtn) {
+  saveBtn.addEventListener('click', () => {
+    const result = generateShowcase();
+    result.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href     = url;
+      a.download = CONFIG.saveFilename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  });
+}
 
 /* ── Drag & drop ───────────────────────────────────────── */
 
@@ -310,11 +334,17 @@ document.querySelectorAll('[data-apply]').forEach(btn => {
 /* ── Init ──────────────────────────────────────────────── */
 
 (async function init() {
-  try { state.template = await loadImage('assets/template.png'); }
-  catch { console.warn('template.png not found — upload clothing to render.'); }
+  try {
+    state.template = await loadImage('assets/template.png');
+  } catch {
+    console.warn('template.png not found — upload clothing to render.');
+  }
 
-  try { state.outline  = await loadImage('assets/outline.png'); }
-  catch { console.warn('outline.png not found — empty state will be blank.'); }
+  try {
+    state.outline = await loadImage('assets/outline.png');
+  } catch {
+    console.warn('outline.png not found — empty state will be blank.');
+  }
 
   refresh();
 })();
