@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clothing Showcaseinator</title>
+  <link rel="icon" type="image/png" href="assets/icon.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- ── Canvas preview ── -->
+    <main class="canvas-area" id="canvas-area">
+      <canvas id="preview" width="700" height="450"></canvas>
+      <div class="drop-overlay" id="drop-overlay">
+        <div class="drop-message">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 3v13m0 0l-5-5m5 5l5-5M4 21h16"/>
+          </svg>
+          <span>Drop PNG here</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+      <header class="sidebar-header">
+        <h1>Clothing Showcaseinator</h1>
+        <p class="subtitle">by mathew1521</p>
+      </header>
+
+      <div class="divider"></div>
+      <h2 class="section-title">Settings</h2>
+
+      <!-- Shirt -->
+      <div class="item-row">
+        <div class="item-header">
+          <span class="item-title">Shirt</span>
+          <span class="filename" id="shirt-filename"></span>
+        </div>
+        <div class="button-row">
+          <button class="btn" data-upload="shirt">Upload</button>
+          <button class="btn" data-clear="shirt">Clear</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Pants -->
+      <div class="item-row">
+        <div class="item-header">
+          <span class="item-title">Pants</span>
+          <span class="filename" id="pants-filename"></span>
+        </div>
+        <div class="button-row">
+          <button class="btn" data-upload="pants">Upload</button>
+          <button class="btn" data-clear="pants">Clear</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Background -->
+      <div class="item-row">
+        <div class="item-header">
+          <span class="item-title">Background</span>
+          <span class="filename" id="background-filename"></span>
+        </div>
+        <div class="button-row">
+          <button class="btn" data-upload="background">Upload</button>
+          <button class="btn" data-clear="background">Clear</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <button class="btn btn-save" id="save">Save</button>
+    </aside>
+  </div>
+
+  <!-- Hidden file inputs -->
+  <input type="file" id="shirt-input" accept=".png,image/png" hidden />
+  <input type="file" id="pants-input" accept=".png,image/png" hidden />
+  <input type="file" id="background-input" accept=".png,image/png" hidden />
+
+  <!-- Drop modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h3>Where do you want to apply this file?</h3>
+      <p class="modal-filename" id="modal-filename"></p>
+      <div class="modal-buttons">
+        <button class="btn" data-apply="shirt">Apply as Shirt</button>
+        <button class="btn" data-apply="pants">Apply as Pants</button>
+        <button class="btn" data-apply="background">Apply as Background</button>
+        <div class="divider"></div>
+        <button class="btn" data-apply="cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
