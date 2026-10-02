@@ -1,53 +1,62 @@
 /* ═══════════════════════════════════════════════════════════
-   Clothing Showcaseinator — Web Edition (Region-Fill Mode)
-   Custom template compatible — Nocturne Designs
+   Clothing Showcaseinator — 2D Showcase
+   Base image: 700 × 450 (character body)
+   Texture:    585 × 559 (standard Roblox clothing)
    ═══════════════════════════════════════════════════════════ */
 
-/* ── Config ────────────────────────────────────────────── */
 const CONFIG = {
   saveFilename: 'showcase.png',
 };
 
-/* ── Region-fill map ───────────────────────────────────────
-   Keys   = exact "R,G,B" of a color in your template.png
-   Values = crop region { x, y, w, h } from the uploaded
-            clothing image that should fill that shape.
-   ────────────────────────────────────────────────────────── */
-const REGION_MAP = {
-  '255,0,0': {        // 🔴 RED — left arm
-    shirt: { x: 151, y: 355, w: 64,  h: 128 },
-    pants: { x: 151, y: 355, w: 64,  h: 128 },
-  },
-  '0,255,0': {        // 🟢 GREEN — front torso (T-shape)
-    shirt: { x: 231, y: 74,  w: 128, h: 128 },
-    pants: { x: 231, y: 74,  w: 128, h: 128 },
-  },
-  '0,0,255': {        // 🔵 BLUE — back torso (T-shape)
-    shirt: { x: 427, y: 74,  w: 128, h: 128 },
-    pants: { x: 427, y: 74,  w: 128, h: 128 },
-  },
-  '255,255,0': {      // 🟡 YELLOW — right arm
-    shirt: { x: 374, y: 355, w: 64,  h: 128 },
-    pants: { x: 374, y: 355, w: 64,  h: 128 },
-  },
-};
+/* ── Region maps ─────────────────────────────────────────
+   sx, sy, sw, sh = crop from uploaded 585×559 texture
+   dx, dy, dw, dh = paste position on 700×450 base image
+   ──────────────────────────────────────────────────────── */
+
+const SHIRT_REGIONS = [
+  // Left arm (viewer's left = Roblox right arm)
+  { sx: 151, sy: 355, sw: 64,  sh: 128,
+    dx: 40,  dy: 100, dw: 100, dh: 200 },
+
+  // Front torso (the T-shape center)
+  { sx: 231, sy: 74,  sw: 128, sh: 128,
+    dx: 180, dy: 100, dw: 340, dh: 190 },
+
+  // Right arm (viewer's right = Roblox left arm)
+  { sx: 374, sy: 355, sw: 64,  sh: 128,
+    dx: 560, dy: 100, dw: 100, dh: 200 },
+];
+
+const PANTS_REGIONS = [
+  // Left leg
+  { sx: 151, sy: 355, sw: 64,  sh: 128,
+    dx: 200, dy: 280, dw: 130, dh: 150 },
+
+  // Right leg
+  { sx: 374, sy: 355, sw: 64,  sh: 128,
+    dx: 370, dy: 280, dw: 130, dh: 150 },
+
+  // Hip area (covers both legs at top)
+  { sx: 231, sy: 74,  sw: 128, sh: 128,
+    dx: 200, dy: 250, dw: 300, dh: 60 },
+];
 
 /* ── State ─────────────────────────────────────────────── */
 const state = {
-  shirt:      null, // { img, name }
+  shirt:      null,
   pants:      null,
   background: null,
-  template:   null, // HTMLImageElement
-  outline:    null, // HTMLImageElement
+  base:       null,
+  outline:    null,
 };
 
-/* ── DOM refs ──────────────────────────────────────────── */
+/* ── DOM ───────────────────────────────────────────────── */
 const preview     = document.getElementById('preview');
 const dropOverlay = document.getElementById('drop-overlay');
 const modal       = document.getElementById('modal');
 const modalName   = document.getElementById('modal-filename');
 
-/* ── Image helpers ─────────────────────────────────────── */
+/* ── Helpers ───────────────────────────────────────────── */
 
 function loadImage(src) {
   return new Promise((resolve, reject) => {
@@ -81,27 +90,29 @@ function imageToCanvas(img) {
   return c;
 }
 
-/* ── Core generation ───────────────────────────────────── */
+/* ── Core render ───────────────────────────────────────── */
 
 function generateShowcase() {
-  /* Empty state → show outline */
-  if (!state.shirt && !state.pants && !state.background) {
+  const hasClothing = state.shirt || state.pants;
+
+  // Empty state → show outline
+  if (!hasClothing) {
     if (state.outline) return imageToCanvas(state.outline);
     const blank = document.createElement('canvas');
     blank.width = 700; blank.height = 450;
     return blank;
   }
 
-  /* No template → fall back to outline or blank */
-  if (!state.template) {
-    if (state.outline) return imageToCanvas(state.outline);
+  // Need a base image
+  if (!state.base) {
+    console.warn('base.png missing — upload one into assets/');
     const blank = document.createElement('canvas');
     blank.width = 700; blank.height = 450;
     return blank;
   }
 
-  const W = state.template.naturalWidth;
-  const H = state.template.naturalHeight;
+  const W = state.base.naturalWidth;
+  const H = state.base.naturalHeight;
 
   const canvas = document.createElement('canvas');
   canvas.width  = W;
@@ -109,83 +120,33 @@ function generateShowcase() {
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
 
-  /* 1. Stretch background across the whole canvas */
+  // 1. Background (if user uploaded one)
   if (state.background) {
     ctx.drawImage(state.background.img, 0, 0, W, H);
   }
 
-  /* 2. Rasterize the template so we can read its pixels */
-  const tmplCanvas = document.createElement('canvas');
-  tmplCanvas.width  = W;
-  tmplCanvas.height = H;
-  const tmplCtx = tmplCanvas.getContext('2d');
-  tmplCtx.imageSmoothingEnabled = false;
-  tmplCtx.drawImage(state.template, 0, 0);
-  const tmplData = tmplCtx.getImageData(0, 0, W, H).data;
+  // 2. Draw the character body
+  ctx.drawImage(state.base, 0, 0, W, H);
 
-  /* 3. For each color, build a mask, then fill it */
-  for (const [colorKey, mapping] of Object.entries(REGION_MAP)) {
-    const maskCanvas = document.createElement('canvas');
-    maskCanvas.width  = W;
-    maskCanvas.height = H;
-    const maskCtx = maskCanvas.getContext('2d');
-    const maskImg = maskCtx.createImageData(W, H);
-
-    let minX = W, minY = H, maxX = -1, maxY = -1;
-    let found = false;
-
-    for (let y = 0; y < H; y++) {
-      for (let x = 0; x < W; x++) {
-        const i = (y * W + x) * 4;
-        if (tmplData[i + 3] === 0) continue; // transparent
-        const key = `${tmplData[i]},${tmplData[i + 1]},${tmplData[i + 2]}`;
-        if (key !== colorKey) continue;
-
-        maskImg.data[i]     = 255;
-        maskImg.data[i + 1] = 255;
-        maskImg.data[i + 2] = 255;
-        maskImg.data[i + 3] = 255;
-
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
-        if (y > maxY) maxY = y;
-        found = true;
-      }
-    }
-
-    if (!found) continue; // this color isn't in the template
-
-    maskCtx.putImageData(maskImg, 0, 0);
-
-    const bboxW = maxX - minX + 1;
-    const bboxH = maxY - minY + 1;
-
-    /* Draw shirt AND pants into the region */
-    for (const type of ['shirt', 'pants']) {
-      const item = state[type];
-      if (!item) continue;
-      const src = mapping[type];
-      if (!src) continue;
-
-      /* Texture layer: crop from clothing image, stretch to bbox */
-      const texCanvas = document.createElement('canvas');
-      texCanvas.width  = W;
-      texCanvas.height = H;
-      const texCtx = texCanvas.getContext('2d');
-      texCtx.imageSmoothingEnabled = false;
-      texCtx.drawImage(
-        item.img,
-        src.x, src.y, src.w, src.h,   // source crop
-        minX,  minY,  bboxW, bboxH    // destination (stretched)
+  // 3. Pants first (under shirt)
+  if (state.pants) {
+    for (const r of PANTS_REGIONS) {
+      ctx.drawImage(
+        state.pants.img,
+        r.sx, r.sy, r.sw, r.sh,
+        r.dx, r.dy, r.dw, r.dh
       );
+    }
+  }
 
-      /* Clip to mask shape */
-      texCtx.globalCompositeOperation = 'destination-in';
-      texCtx.drawImage(maskCanvas, 0, 0);
-
-      /* Composite onto the main canvas */
-      ctx.drawImage(texCanvas, 0, 0);
+  // 4. Shirt on top
+  if (state.shirt) {
+    for (const r of SHIRT_REGIONS) {
+      ctx.drawImage(
+        state.shirt.img,
+        r.sx, r.sy, r.sw, r.sh,
+        r.dx, r.dy, r.dw, r.dh
+      );
     }
   }
 
@@ -198,14 +159,13 @@ function refresh() {
   const result = generateShowcase();
   preview.width  = result.width;
   preview.height = result.height;
-
   const ctx = preview.getContext('2d');
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, result.width, result.height);
   ctx.drawImage(result, 0, 0);
 }
 
-/* ── Set / clear helpers ───────────────────────────────── */
+/* ── Set / clear ───────────────────────────────────────── */
 
 function setItem(kind, img, name) {
   state[kind] = { img, name };
@@ -221,7 +181,7 @@ function clearItem(kind) {
   refresh();
 }
 
-/* ── Sidebar: upload / clear buttons ───────────────────── */
+/* ── Sidebar ───────────────────────────────────────────── */
 
 document.querySelectorAll('[data-upload]').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -245,7 +205,7 @@ document.querySelectorAll('[data-clear]').forEach(btn => {
     } catch (err) {
       alert(err.message);
     }
-    e.target.value = ''; // allow re-selecting same file
+    e.target.value = '';
   });
 });
 
@@ -298,7 +258,6 @@ document.addEventListener('drop', async e => {
 
   const file = e.dataTransfer.files[0];
   if (!file) return;
-
   if (!file.name.toLowerCase().endsWith('.png')) {
     alert('Only PNG images are supported.');
     return;
@@ -309,24 +268,15 @@ document.addEventListener('drop', async e => {
   modal.classList.add('visible');
 });
 
-/* ── Modal buttons ─────────────────────────────────────── */
-
 document.querySelectorAll('[data-apply]').forEach(btn => {
   btn.addEventListener('click', async () => {
     const action = btn.dataset.apply;
     modal.classList.remove('visible');
-
-    if (action === 'cancel' || !pendingFile) {
-      pendingFile = null;
-      return;
-    }
-
+    if (action === 'cancel' || !pendingFile) { pendingFile = null; return; }
     try {
       const img = await fileToImage(pendingFile);
       setItem(action, img, pendingFile.name);
-    } catch (err) {
-      alert(err.message);
-    }
+    } catch (err) { alert(err.message); }
     pendingFile = null;
   });
 });
@@ -334,17 +284,11 @@ document.querySelectorAll('[data-apply]').forEach(btn => {
 /* ── Init ──────────────────────────────────────────────── */
 
 (async function init() {
-  try {
-    state.template = await loadImage('assets/template.png');
-  } catch {
-    console.warn('template.png not found — upload clothing to render.');
-  }
+  try { state.base    = await loadImage('assets/base.png');    }
+  catch { console.warn('base.png missing — add your character body image.'); }
 
-  try {
-    state.outline = await loadImage('assets/outline.png');
-  } catch {
-    console.warn('outline.png not found — empty state will be blank.');
-  }
+  try { state.outline = await loadImage('assets/outline.png'); }
+  catch { console.warn('outline.png missing.'); }
 
   refresh();
 })();
