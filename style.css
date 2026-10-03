@@ -1,4 +1,3 @@
-/* ── Font ────────────────────────────────── */
 @font-face {
   font-family: 'Roboto';
   src: url('assets/roboto.ttf') format('truetype');
@@ -7,20 +6,18 @@
   font-display: swap;
 }
 
-/* ── Theme (matches Fyne customTheme) ─────── */
 :root {
-  --bg:            #181a1b;   /* 24, 26, 27 */
-  --overlay-bg:    #23282b;   /* 35, 40, 43 */
-  --text:          #f8f6eb;   /* 248, 246, 235 */
-  --btn:           #383d3f;   /* 56, 61, 63 */
-  --btn-hover:     #444a4c;   /* 68, 74, 76 */
-  --btn-flash:     #505759;   /* 80, 87, 89 */
-  --grad-center:   #2d3235;   /* 45, 50, 53 */
-  --grad-edge:     #141617;   /* 20, 22, 23 */
-  --sidebar-w:     280px;
+  --bg:          #181a1b;
+  --overlay-bg:  #23282b;
+  --text:        #f8f6eb;
+  --btn:         #383d3f;
+  --btn-hover:   #444a4c;
+  --btn-flash:   #505759;
+  --grad-center: #2d3235;
+  --grad-edge:   #141617;
+  --sidebar-w:   340px;
 }
 
-/* ── Reset ───────────────────────────────── */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
@@ -32,23 +29,18 @@ html, body {
   font-size: 14px;
 }
 
-/* ── Window ──────────────────────────────── */
-.window {
-  display: flex;
-  height: 100vh;
-  width: 100vw;
-}
+.window { display: flex; height: 100vh; width: 100vw; }
 
-/* ── Canvas area ─────────────────────────── */
+/* ── Canvas ────────────────────────────── */
 .canvas-area {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   background: radial-gradient(circle at center, var(--grad-center), var(--grad-edge));
-  padding: 0 60px 0 45px;
+  padding: 40px;
   position: relative;
-  overflow: hidden;
+  overflow: auto;
 }
 
 #preview {
@@ -58,14 +50,13 @@ html, body {
   object-fit: contain;
 }
 
-/* ── Vertical border ─────────────────────── */
 .v-border {
   width: 1px;
   background: var(--text);
   flex-shrink: 0;
 }
 
-/* ── Sidebar ─────────────────────────────── */
+/* ── Sidebar ───────────────────────────── */
 .sidebar {
   width: var(--sidebar-w);
   background: var(--bg);
@@ -76,37 +67,44 @@ html, body {
   flex-shrink: 0;
 }
 
-.sidebar-header h1 {
-  font-size: 18px;
-  font-weight: 500;
-  line-height: 1.2;
-}
+.sidebar-header h1 { font-size: 18px; font-weight: 500; line-height: 1.2; }
+.sidebar-header .subtitle { font-size: 13px; opacity: 0.85; margin-top: 2px; }
 
-.sidebar-header .subtitle {
-  font-size: 13px;
-  opacity: 0.85;
-  margin-top: 2px;
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-/* ── Spacing helpers (match Fyne gaps) ───── */
 .gap-2 { height: 2px; }
 .gap-4 { height: 4px; }
 .gap-8 { height: 8px; }
 
-/* ── Divider ─────────────────────────────── */
-.divider {
-  height: 1px;
-  background: var(--text);
-  opacity: 1;
-  margin: 0;
+.divider { height: 1px; background: var(--text); margin: 0; }
+
+/* ── Mode toggle ───────────────────────── */
+.mode-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
 }
 
-/* ── Item rows ───────────────────────────── */
+.mode-btn {
+  background: var(--btn);
+  color: var(--text);
+  border: none;
+  padding: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+
+.mode-btn:hover { background: var(--btn-hover); }
+
+.mode-btn.active {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.mode-panel.hidden { display: none; }
+
+/* ── Item rows ─────────────────────────── */
 .item-row {
   display: flex;
   flex-direction: column;
@@ -120,13 +118,12 @@ html, body {
   gap: 8px;
 }
 
-.item-title {
-  font-size: 14px;
-}
+.item-title { font-size: 14px; font-weight: 500; }
 
 .filename {
-  font-size: 14px;
+  font-size: 12px;
   text-align: right;
+  opacity: 0.7;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -136,18 +133,79 @@ html, body {
 .button-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0;
+  gap: 4px;
 }
 
-/* ── Buttons ─────────────────────────────── */
+/* ── Slot card (multi mode) ────────────── */
+.slot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.slot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.slot-title { font-size: 14px; font-weight: 500; }
+
+.slot-template {
+  flex: 1;
+  background: var(--btn);
+  color: var(--text);
+  border: none;
+  padding: 6px 8px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+}
+
+.slot-template:hover { background: var(--btn-hover); }
+
+.slot-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slot-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+}
+
+.slot-filename {
+  opacity: 0.6;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+  text-align: right;
+}
+
+.slot-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+/* ── Buttons ───────────────────────────── */
 .btn {
   background: var(--btn);
   color: var(--text);
   border: none;
-  padding: 10px 16px;
+  padding: 8px 12px;
   font-family: inherit;
-  font-size: 16px;
-  text-align: center;
+  font-size: 14px;
   cursor: pointer;
   user-select: none;
   transition: background 0.15s ease;
@@ -157,11 +215,23 @@ html, body {
 .btn:hover  { background: var(--btn-hover); }
 .btn:active { background: var(--btn-flash); }
 
-.btn-save {
-  margin-top: 0;
-}
+.btn-save { font-size: 16px; padding: 12px; }
 
-/* ── Modal (Fyne dialog) ─────────────────── */
+/* Template dropdown in single mode */
+#single-template {
+  background: var(--btn);
+  color: var(--text);
+  border: none;
+  padding: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  width: 100%;
+}
+#single-template:hover { background: var(--btn-hover); }
+
+/* ── Modal ─────────────────────────────── */
 .modal {
   position: fixed;
   inset: 0;
@@ -175,26 +245,22 @@ html, body {
   z-index: 100;
 }
 
-.modal.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
+.modal.visible { opacity: 1; pointer-events: auto; }
 
 .modal-content {
   background: var(--overlay-bg);
   padding: 20px;
   min-width: 340px;
   max-width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
 }
 
-.modal-content h3 {
-  font-size: 15px;
-  font-weight: 500;
-}
+.modal-content h3 { font-size: 15px; font-weight: 500; }
 
 .modal-filename {
   font-size: 13px;
@@ -204,13 +270,9 @@ html, body {
   white-space: nowrap;
 }
 
-.modal-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+.modal-buttons { display: flex; flex-direction: column; gap: 6px; }
 
-/* ── Drop overlay ────────────────────────── */
+/* ── Drop overlay ──────────────────────── */
 .drop-overlay {
   position: absolute;
   inset: 0;
@@ -225,9 +287,7 @@ html, body {
   z-index: 10;
 }
 
-.drop-overlay.visible {
-  opacity: 1;
-}
+.drop-overlay.visible { opacity: 1; }
 
 .drop-message {
   display: flex;
@@ -238,24 +298,11 @@ html, body {
   color: var(--text);
 }
 
-/* ── Mobile ──────────────────────────────── */
+/* ── Mobile ────────────────────────────── */
 @media (max-width: 768px) {
   html, body { overflow: auto; }
-
   .window { flex-direction: column; height: auto; min-height: 100vh; }
-
-  .canvas-area {
-    min-height: 50vh;
-    padding: 30px 20px;
-  }
-
-  .v-border {
-    width: 100%;
-    height: 1px;
-  }
-
-  .sidebar {
-    width: 100%;
-    overflow-y: visible;
-  }
+  .canvas-area { min-height: 50vh; padding: 20px; }
+  .v-border { width: 100%; height: 1px; }
+  .sidebar { width: 100%; overflow-y: visible; }
 }
