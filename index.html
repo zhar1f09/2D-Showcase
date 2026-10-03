@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app">
+  <div class="window">
     <!-- ── Canvas preview ── -->
     <main class="canvas-area" id="canvas-area">
       <canvas id="preview" width="700" height="450"></canvas>
@@ -22,6 +22,9 @@
       </div>
     </main>
 
+    <!-- ── Vertical border ── -->
+    <div class="v-border"></div>
+
     <!-- ── Sidebar ── -->
     <aside class="sidebar">
       <header class="sidebar-header">
@@ -29,8 +32,11 @@
         <p class="subtitle">by mathew1521</p>
       </header>
 
-      <div class="divider"></div>
+      <div class="gap-8"></div>
+
       <h2 class="section-title">Settings</h2>
+      <div class="divider"></div>
+      <div class="gap-4"></div>
 
       <!-- Shirt -->
       <div class="item-row">
@@ -38,13 +44,16 @@
           <span class="item-title">Shirt</span>
           <span class="filename" id="shirt-filename"></span>
         </div>
+        <div class="gap-2"></div>
         <div class="button-row">
           <button class="btn" data-upload="shirt">Upload</button>
           <button class="btn" data-clear="shirt">Clear</button>
         </div>
       </div>
 
+      <div class="gap-4"></div>
       <div class="divider"></div>
+      <div class="gap-4"></div>
 
       <!-- Pants -->
       <div class="item-row">
@@ -52,13 +61,16 @@
           <span class="item-title">Pants</span>
           <span class="filename" id="pants-filename"></span>
         </div>
+        <div class="gap-2"></div>
         <div class="button-row">
           <button class="btn" data-upload="pants">Upload</button>
           <button class="btn" data-clear="pants">Clear</button>
         </div>
       </div>
 
+      <div class="gap-4"></div>
       <div class="divider"></div>
+      <div class="gap-4"></div>
 
       <!-- Background -->
       <div class="item-row">
@@ -66,33 +78,16 @@
           <span class="item-title">Background</span>
           <span class="filename" id="background-filename"></span>
         </div>
+        <div class="gap-2"></div>
         <div class="button-row">
           <button class="btn" data-upload="background">Upload</button>
           <button class="btn" data-clear="background">Clear</button>
         </div>
       </div>
 
+      <div class="gap-4"></div>
       <div class="divider"></div>
-
-      <!-- Skin Tone -->
-      <div class="item-row">
-        <div class="item-header">
-          <span class="item-title">Skin Tone</span>
-        </div>
-        <div class="skin-row">
-          <input type="color" id="skin-picker" value="#ffd8c2" />
-          <div class="skin-presets" id="skin-presets">
-            <button class="preset" data-color="#FFD8C2" style="background:#FFD8C2" title="Light"></button>
-            <button class="preset" data-color="#E1AF92" style="background:#E1AF92" title="Fair"></button>
-            <button class="preset" data-color="#CE926A" style="background:#CE926A" title="Medium"></button>
-            <button class="preset" data-color="#B87754" style="background:#B87754" title="Tan"></button>
-            <button class="preset" data-color="#884B24" style="background:#884B24" title="Brown"></button>
-            <button class="preset" data-color="#593123" style="background:#593123" title="Dark"></button>
-          </div>
-        </div>
-      </div>
-
-      <div class="divider"></div>
+      <div class="gap-4"></div>
 
       <button class="btn btn-save" id="save">Save</button>
     </aside>
@@ -103,7 +98,7 @@
   <input type="file" id="pants-input" accept=".png,image/png" hidden />
   <input type="file" id="background-input" accept=".png,image/png" hidden />
 
-  <!-- Drop modal -->
+  <!-- Drop modal (matches Fyne dialog) -->
   <div class="modal" id="modal">
     <div class="modal-content">
       <h3>Where do you want to apply this file?</h3>

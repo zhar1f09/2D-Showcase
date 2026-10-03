@@ -7,18 +7,17 @@
   font-display: swap;
 }
 
-/* ── Theme ───────────────────────────────── */
+/* ── Theme (matches Fyne customTheme) ─────── */
 :root {
-  --bg-dark:      #141617;
-  --bg-center:    #2d3235;
-  --panel-bg:     #181a1b;
-  --overlay-bg:   #23282b;
-  --text:         #f8f6eb;
-  --btn-bg:       #383d3f;
-  --btn-hover:    #444a4c;
-  --btn-flash:    #505759;
-  --border:       #f8f6eb;
-  --sidebar-w:    320px;
+  --bg:            #181a1b;   /* 24, 26, 27 */
+  --overlay-bg:    #23282b;   /* 35, 40, 43 */
+  --text:          #f8f6eb;   /* 248, 246, 235 */
+  --btn:           #383d3f;   /* 56, 61, 63 */
+  --btn-hover:     #444a4c;   /* 68, 74, 76 */
+  --btn-flash:     #505759;   /* 80, 87, 89 */
+  --grad-center:   #2d3235;   /* 45, 50, 53 */
+  --grad-edge:     #141617;   /* 20, 22, 23 */
+  --sidebar-w:     280px;
 }
 
 /* ── Reset ───────────────────────────────── */
@@ -27,15 +26,17 @@
 html, body {
   height: 100%;
   font-family: 'Roboto', system-ui, sans-serif;
-  background: var(--bg-dark);
+  background: var(--bg);
   color: var(--text);
   overflow: hidden;
+  font-size: 14px;
 }
 
-/* ── Layout ──────────────────────────────── */
-.app {
+/* ── Window ──────────────────────────────── */
+.window {
   display: flex;
   height: 100vh;
+  width: 100vw;
 }
 
 /* ── Canvas area ─────────────────────────── */
@@ -44,7 +45,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at center, var(--bg-center), var(--bg-dark));
+  background: radial-gradient(circle at center, var(--grad-center), var(--grad-edge));
   padding: 0 60px 0 45px;
   position: relative;
   overflow: hidden;
@@ -55,7 +56,158 @@ html, body {
   max-height: 100%;
   image-rendering: pixelated;
   object-fit: contain;
-  filter: drop-shadow(0 8px 32px rgba(0, 0, 0, 0.5));
+}
+
+/* ── Vertical border ─────────────────────── */
+.v-border {
+  width: 1px;
+  background: var(--text);
+  flex-shrink: 0;
+}
+
+/* ── Sidebar ─────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg);
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar-header h1 {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.sidebar-header .subtitle {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* ── Spacing helpers (match Fyne gaps) ───── */
+.gap-2 { height: 2px; }
+.gap-4 { height: 4px; }
+.gap-8 { height: 8px; }
+
+/* ── Divider ─────────────────────────────── */
+.divider {
+  height: 1px;
+  background: var(--text);
+  opacity: 1;
+  margin: 0;
+}
+
+/* ── Item rows ───────────────────────────── */
+.item-row {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.item-title {
+  font-size: 14px;
+}
+
+.filename {
+  font-size: 14px;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+}
+
+.button-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+/* ── Buttons ─────────────────────────────── */
+.btn {
+  background: var(--btn);
+  color: var(--text);
+  border: none;
+  padding: 10px 16px;
+  font-family: inherit;
+  font-size: 16px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease;
+  width: 100%;
+}
+
+.btn:hover  { background: var(--btn-hover); }
+.btn:active { background: var(--btn-flash); }
+
+.btn-save {
+  margin-top: 0;
+}
+
+/* ── Modal (Fyne dialog) ─────────────────── */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 100;
+}
+
+.modal.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  background: var(--overlay-bg);
+  padding: 20px;
+  min-width: 340px;
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+.modal-content h3 {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.modal-filename {
+  font-size: 13px;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 /* ── Drop overlay ────────────────────────── */
@@ -86,216 +238,24 @@ html, body {
   color: var(--text);
 }
 
-/* ── Sidebar ─────────────────────────────── */
-.sidebar {
-  width: var(--sidebar-w);
-  background: var(--panel-bg);
-  border-left: 1px solid var(--border);
-  padding: 20px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.sidebar-header h1 {
-  font-size: 18px;
-  font-weight: 500;
-  line-height: 1.2;
-}
-
-.sidebar-header .subtitle {
-  font-size: 13px;
-  opacity: 0.75;
-  margin-top: 2px;
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-/* ── Divider ─────────────────────────────── */
-.divider {
-  height: 1px;
-  background: var(--border);
-  opacity: 0.6;
-  margin: 4px 0;
-}
-
-/* ── Item rows ───────────────────────────── */
-.item-row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.item-title {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.filename {
-  font-size: 12px;
-  opacity: 0.6;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 160px;
-  text-align: right;
-}
-
-.button-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-}
-
-/* ── Buttons ─────────────────────────────── */
-.btn {
-  background: var(--btn-bg);
-  color: var(--text);
-  border: none;
-  padding: 10px 16px;
-  font-family: inherit;
-  font-size: 15px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-  user-select: none;
-}
-
-.btn:hover  { background: var(--btn-hover); }
-.btn:active { background: var(--btn-flash); }
-
-.btn-save {
-  margin-top: auto;
-  font-size: 16px;
-}
-
-/* ── Skin tone picker ────────────────────── */
-.skin-row {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-#skin-picker {
-  width: 100%;
-  height: 40px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  background: transparent;
-  padding: 0;
-}
-
-#skin-picker::-webkit-color-swatch-wrapper { padding: 0; }
-#skin-picker::-webkit-color-swatch {
-  border: none;
-  border-radius: 6px;
-}
-#skin-picker::-moz-color-swatch {
-  border: none;
-  border-radius: 6px;
-}
-
-.skin-presets {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
-}
-
-.preset {
-  height: 24px;
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 6px;
-  cursor: pointer;
-  padding: 0;
-  transition: transform 0.1s ease, border-color 0.1s ease;
-}
-
-.preset:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255,255,255,0.4);
-}
-
-.preset.active {
-  border-color: #f8f6eb;
-  border-width: 2px;
-}
-
-/* ── Modal ───────────────────────────────── */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-  z-index: 100;
-}
-
-.modal.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.modal-content {
-  background: var(--overlay-bg);
-  padding: 24px;
-  width: 360px;
-  max-width: 90vw;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-}
-
-.modal-content h3 {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.modal-filename {
-  font-size: 13px;
-  opacity: 0.7;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.modal-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 /* ── Mobile ──────────────────────────────── */
 @media (max-width: 768px) {
   html, body { overflow: auto; }
 
-  .app { flex-direction: column; height: auto; min-height: 100vh; }
+  .window { flex-direction: column; height: auto; min-height: 100vh; }
 
   .canvas-area {
     min-height: 50vh;
     padding: 30px 20px;
   }
 
+  .v-border {
+    width: 100%;
+    height: 1px;
+  }
+
   .sidebar {
     width: 100%;
-    border-left: none;
-    border-top: 1px solid var(--border);
     overflow-y: visible;
   }
 }
