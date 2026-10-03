@@ -1,52 +1,44 @@
 /* ═══════════════════════════════════════════════════════════
    Clothing Showcaseinator — 2D Showcase
-   Base image: 700 × 450 (character body)
-   Texture:    585 × 559 (standard Roblox clothing)
+   Template.png drives everything. Colored regions get filled
+   with skin tone (default) or clothing texture (when uploaded).
    ═══════════════════════════════════════════════════════════ */
 
 const CONFIG = {
   saveFilename: 'showcase.png',
+  skinTone:     { r: 255, g: 216, b: 194 },   // default — updates from picker
 };
 
-/* ── Region maps ─────────────────────────────────────────
-   sx, sy, sw, sh = crop from uploaded 585×559 texture
-   dx, dy, dw, dh = paste position on 700×450 base image
+/* ── Anchor map ──────────────────────────────────────────
+   Keys  = exact "R,G,B" of colors in template.png
+   Values = crop { sx, sy, sw, sh } from the uploaded
+            585×559 clothing texture that fills that region
    ──────────────────────────────────────────────────────── */
-
-const SHIRT_REGIONS = [
-  // Left arm (viewer's left = Roblox right arm)
-  { sx: 151, sy: 355, sw: 64,  sh: 128,
-    dx: 40,  dy: 100, dw: 100, dh: 200 },
-
-  // Front torso (the T-shape center)
-  { sx: 231, sy: 74,  sw: 128, sh: 128,
-    dx: 180, dy: 100, dw: 340, dh: 190 },
-
-  // Right arm (viewer's right = Roblox left arm)
-  { sx: 374, sy: 355, sw: 64,  sh: 128,
-    dx: 560, dy: 100, dw: 100, dh: 200 },
-];
-
-const PANTS_REGIONS = [
-  // Left leg
-  { sx: 151, sy: 355, sw: 64,  sh: 128,
-    dx: 200, dy: 280, dw: 130, dh: 150 },
-
-  // Right leg
-  { sx: 374, sy: 355, sw: 64,  sh: 128,
-    dx: 370, dy: 280, dw: 130, dh: 150 },
-
-  // Hip area (covers both legs at top)
-  { sx: 231, sy: 74,  sw: 128, sh: 128,
-    dx: 200, dy: 250, dw: 300, dh: 60 },
-];
+const ANCHORS = {
+  '255,0,0': {        // 🔴 RED — left arm
+    shirt: { sx: 151, sy: 355, sw: 64,  sh: 128 },
+    pants: { sx: 151, sy: 355, sw: 64,  sh: 128 },
+  },
+  '0,255,0': {        // 🟢 GREEN — front torso
+    shirt: { sx: 231, sy: 74,  sw: 128, sh: 128 },
+    pants: { sx: 231, sy: 74,  sw: 128, sh: 128 },
+  },
+  '0,0,255': {        // 🔵 BLUE — back torso
+    shirt: { sx: 427, sy: 74,  sw: 128, sh: 128 },
+    pants: { sx: 427, sy: 74,  sw: 128, sh: 128 },
+  },
+  '255,255,0': {      // 🟡 YELLOW — right arm
+    shirt: { sx: 374, sy: 355, sw: 64,  sh: 128 },
+    pants: { sx: 374, sy: 355, sw: 64,  sh: 128 },
+  },
+};
 
 /* ── State ─────────────────────────────────────────────── */
 const state = {
   shirt:      null,
   pants:      null,
   background: null,
-  base:       null,
+  template:   null,
   outline:    null,
 };
 
@@ -56,7 +48,7 @@ const dropOverlay = document.getElementById('drop-overlay');
 const modal       = document.getElementById('modal');
 const modalName   = document.getElementById('modal-filename');
 
-/* ── Helpers ───────────────────────────────────────────── */
+/* ── Image helpers ─────────────────────────────────────── */
 
 function loadImage(src) {
   return new Promise((resolve, reject) => {
@@ -90,12 +82,66 @@ function imageToCanvas(img) {
   return c;
 }
 
+function rasterize(img) {
+  const c = document.createElement('canvas');
+  c.width  = img.naturalWidth;
+  c.height = img.naturalHeight;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(img, 0, 0);
+  return {
+    width:  c.width,
+    height: c.height,
+    data:   ctx.getImageData(0, 0, c.width, c.height).data,
+  };
+}
+
+/* ── Color helpers ─────────────────────────────────────── */
+
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  return {
+    r: parseInt(h.substring(0, 2), 16),
+    g: parseInt(h.substring(2, 4), 16),
+    b: parseInt(h.substring(4, 6), 16),
+  };
+}
+
+function rgbToHex({ r, g, b }) {
+  const to2 = n => n.toString(16).padStart(2, '0');
+  return `#${to2(r)}${to2(g)}${to2(b)}`;
+}
+
+/* ── Bounding boxes for each anchor color ──────────────── */
+
+function computeBBoxes(tmplData, W, H) {
+  const boxes = {};
+  for (const key of Object.keys(ANCHORS)) {
+    boxes[key] = { minX: W, minY: H, maxX: -1, maxY: -1, found: false };
+  }
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const i = (y * W + x) * 4;
+      if (tmplData[i + 3] === 0) continue;
+      const key = `${tmplData[i]},${tmplData[i + 1]},${tmplData[i + 2]}`;
+      const bb = boxes[key];
+      if (!bb) continue;
+      if (x < bb.minX) bb.minX = x;
+      if (x > bb.maxX) bb.maxX = x;
+      if (y < bb.minY) bb.minY = y;
+      if (y > bb.maxY) bb.maxY = y;
+      bb.found = true;
+    }
+  }
+  return boxes;
+}
+
 /* ── Core render ───────────────────────────────────────── */
 
 function generateShowcase() {
   const hasClothing = state.shirt || state.pants;
 
-  // Empty state → show outline
+  /* Empty state → outline */
   if (!hasClothing) {
     if (state.outline) return imageToCanvas(state.outline);
     const blank = document.createElement('canvas');
@@ -103,57 +149,108 @@ function generateShowcase() {
     return blank;
   }
 
-  // Need a base image
-  if (!state.base) {
-    console.warn('base.png missing — upload one into assets/');
+  if (!state.template) {
+    if (state.outline) return imageToCanvas(state.outline);
     const blank = document.createElement('canvas');
     blank.width = 700; blank.height = 450;
     return blank;
   }
 
-  const W = state.base.naturalWidth;
-  const H = state.base.naturalHeight;
+  const W = state.template.naturalWidth;
+  const H = state.template.naturalHeight;
 
+  /* Rasterize template so we can read pixels */
+  const tmpCanvas = document.createElement('canvas');
+  tmpCanvas.width  = W;
+  tmpCanvas.height = H;
+  const tmpCtx = tmpCanvas.getContext('2d');
+  tmpCtx.imageSmoothingEnabled = false;
+  tmpCtx.drawImage(state.template, 0, 0);
+  const tmpData = tmpCtx.getImageData(0, 0, W, H).data;
+
+  /* Bounding boxes for each colored region */
+  const bboxes = computeBBoxes(tmpData, W, H);
+
+  /* Rasterize uploaded clothing */
+  const shirtPix = state.shirt ? rasterize(state.shirt.img) : null;
+  const pantsPix = state.pants ? rasterize(state.pants.img) : null;
+
+  /* Output canvas */
   const canvas = document.createElement('canvas');
   canvas.width  = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
 
-  // 1. Background (if user uploaded one)
+  /* Optional background */
   if (state.background) {
     ctx.drawImage(state.background.img, 0, 0, W, H);
   }
 
-  // 2. Draw the character body
-  ctx.drawImage(state.base, 0, 0, W, H);
+  /* Per-pixel fill */
+  const out = ctx.getImageData(0, 0, W, H);
 
-  // 3. Pants first (under shirt)
-  if (state.pants) {
-    for (const r of PANTS_REGIONS) {
-      ctx.drawImage(
-        state.pants.img,
-        r.sx, r.sy, r.sw, r.sh,
-        r.dx, r.dy, r.dw, r.dh
-      );
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const i = (y * W + x) * 4;
+      const a = tmpData[i + 3];
+
+      /* Transparent → leave as-is (background shows) */
+      if (a === 0) continue;
+
+      const key = `${tmpData[i]},${tmpData[i + 1]},${tmpData[i + 2]}`;
+      const anchor = ANCHORS[key];
+
+      /* Non-anchor pixel → copy from template (branding text) */
+      if (!anchor) {
+        out.data[i]     = tmpData[i];
+        out.data[i + 1] = tmpData[i + 1];
+        out.data[i + 2] = tmpData[i + 2];
+        out.data[i + 3] = tmpData[i + 3];
+        continue;
+      }
+
+      /* Anchor pixel → fill with clothing or skin tone */
+      const bb = bboxes[key];
+      if (!bb || !bb.found) continue;
+
+      const bbW = bb.maxX - bb.minX + 1;
+      const bbH = bb.maxY - bb.minY + 1;
+      const u = (x - bb.minX) / bbW;   // 0..1 across region
+      const v = (y - bb.minY) / bbH;   // 0..1 down region
+
+      let src    = null;
+      let coords = null;
+      if (state.shirt && shirtPix) {
+        src = shirtPix; coords = anchor.shirt;
+      } else if (state.pants && pantsPix) {
+        src = pantsPix; coords = anchor.pants;
+      }
+
+      if (src && coords) {
+        const srcX = Math.min(src.width  - 1, Math.floor(coords.sx + u * coords.sw));
+        const srcY = Math.min(src.height - 1, Math.floor(coords.sy + v * coords.sh));
+        const si   = (srcY * src.width + srcX) * 4;
+        out.data[i]     = src.data[si];
+        out.data[i + 1] = src.data[si + 1];
+        out.data[i + 2] = src.data[si + 2];
+        out.data[i + 3] = 255;
+      } else {
+        /* Live-read skin tone so picker changes apply instantly */
+        const sk = CONFIG.skinTone;
+        out.data[i]     = sk.r;
+        out.data[i + 1] = sk.g;
+        out.data[i + 2] = sk.b;
+        out.data[i + 3] = 255;
+      }
     }
   }
 
-  // 4. Shirt on top
-  if (state.shirt) {
-    for (const r of SHIRT_REGIONS) {
-      ctx.drawImage(
-        state.shirt.img,
-        r.sx, r.sy, r.sw, r.sh,
-        r.dx, r.dy, r.dw, r.dh
-      );
-    }
-  }
-
+  ctx.putImageData(out, 0, 0);
   return canvas;
 }
 
-/* ── Refresh preview ───────────────────────────────────── */
+/* ── Preview refresh ───────────────────────────────────── */
 
 function refresh() {
   const result = generateShowcase();
@@ -181,7 +278,7 @@ function clearItem(kind) {
   refresh();
 }
 
-/* ── Sidebar ───────────────────────────────────────────── */
+/* ── Sidebar upload / clear ────────────────────────────── */
 
 document.querySelectorAll('[data-upload]').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -208,6 +305,43 @@ document.querySelectorAll('[data-clear]').forEach(btn => {
     e.target.value = '';
   });
 });
+
+/* ── Skin tone picker ──────────────────────────────────── */
+
+(function initSkinPicker() {
+  const picker  = document.getElementById('skin-picker');
+  const presets = document.querySelectorAll('.preset');
+  if (!picker) return;
+
+  /* Initial value from CONFIG */
+  picker.value = rgbToHex(CONFIG.skinTone);
+
+  /* Live changes from the color input */
+  picker.addEventListener('input', e => {
+    CONFIG.skinTone = hexToRgb(e.target.value);
+    presets.forEach(p => p.classList.remove('active'));
+    refresh();
+  });
+
+  /* Preset swatches */
+  presets.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const hex = btn.dataset.color;
+      picker.value = hex;
+      CONFIG.skinTone = hexToRgb(hex);
+      presets.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      refresh();
+    });
+  });
+
+  /* Mark the default swatch as active */
+  presets.forEach(btn => {
+    if (btn.dataset.color.toLowerCase() === rgbToHex(CONFIG.skinTone).toLowerCase()) {
+      btn.classList.add('active');
+    }
+  });
+})();
 
 /* ── Save ──────────────────────────────────────────────── */
 
@@ -284,10 +418,10 @@ document.querySelectorAll('[data-apply]').forEach(btn => {
 /* ── Init ──────────────────────────────────────────────── */
 
 (async function init() {
-  try { state.base    = await loadImage('assets/base.png');    }
-  catch { console.warn('base.png missing — add your character body image.'); }
+  try { state.template = await loadImage('assets/template.png'); }
+  catch { console.warn('template.png missing.'); }
 
-  try { state.outline = await loadImage('assets/outline.png'); }
+  try { state.outline  = await loadImage('assets/outline.png');  }
   catch { console.warn('outline.png missing.'); }
 
   refresh();
