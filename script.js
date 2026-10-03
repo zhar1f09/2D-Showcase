@@ -1,18 +1,20 @@
 /* ═══════════════════════════════════════════════════════════
    Clothing Showcaseinator — 2D Showcase
-   Template.png drives everything. Colored regions get filled
-   with skin tone (default) or clothing texture (when uploaded).
+   Adapted for solid-block template.png (red/green/blue/yellow)
+   Outline.png is the base layer (branding); template defines
+   where clothing + skin tone go.
    ═══════════════════════════════════════════════════════════ */
 
 const CONFIG = {
   saveFilename: 'showcase.png',
-  skinTone:     { r: 255, g: 216, b: 194 },   // default — updates from picker
+  skinTone:     { r: 255, g: 216, b: 194 },
+  colorTolerance: 40,       // how close a pixel must be to an anchor color to count
+  showOutlineBase: true,    // render outline.png behind the clothing
 };
 
 /* ── Anchor map ──────────────────────────────────────────
-   Keys  = exact "R,G,B" of colors in template.png
-   Values = crop { sx, sy, sw, sh } from the uploaded
-            585×559 clothing texture that fills that region
+   Keys = "R,G,B" of colors in template.png
+   Values = crop { sx, sy, sw, sh } from the 585×559 texture
    ──────────────────────────────────────────────────────── */
 const ANCHORS = {
   '255,0,0': {        // 🔴 RED — left arm
@@ -32,6 +34,12 @@ const ANCHORS = {
     pants: { sx: 374, sy: 355, sw: 64,  sh: 128 },
   },
 };
+
+/* Parse anchor colors into numeric form for fast tolerance checks */
+const ANCHOR_LIST = Object.entries(ANCHORS).map(([key, val]) => {
+  const [r, g, b] = key.split(',').map(Number);
+  return { r, g, b, key, mapping: val };
+});
 
 /* ── State ─────────────────────────────────────────────── */
 const state = {
@@ -112,20 +120,36 @@ function rgbToHex({ r, g, b }) {
   return `#${to2(r)}${to2(g)}${to2(b)}`;
 }
 
-/* ── Bounding boxes for each anchor color ──────────────── */
+/* Match a pixel against the anchor list with tolerance */
+function matchAnchor(r, g, b) {
+  const t = CONFIG.colorTolerance;
+  for (const a of ANCHOR_LIST) {
+    if (Math.abs(r - a.r) <= t &&
+        Math.abs(g - a.g) <= t &&
+        Math.abs(b - a.b) <= t) {
+      return a;
+    }
+  }
+  return null;
+}
+
+/* ── Bounding boxes for each anchor color (with tolerance) ── */
 
 function computeBBoxes(tmplData, W, H) {
   const boxes = {};
-  for (const key of Object.keys(ANCHORS)) {
-    boxes[key] = { minX: W, minY: H, maxX: -1, maxY: -1, found: false };
+  for (const a of ANCHOR_LIST) {
+    boxes[a.key] = { minX: W, minY: H, maxX: -1, maxY: -1, found: false };
   }
+
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
       const i = (y * W + x) * 4;
       if (tmplData[i + 3] === 0) continue;
-      const key = `${tmplData[i]},${tmplData[i + 1]},${tmplData[i + 2]}`;
-      const bb = boxes[key];
-      if (!bb) continue;
+
+      const match = matchAnchor(tmplData[i], tmplData[i + 1], tmplData[i + 2]);
+      if (!match) continue;
+
+      const bb = boxes[match.key];
       if (x < bb.minX) bb.minX = x;
       if (x > bb.maxX) bb.maxX = x;
       if (y < bb.minY) bb.minY = y;
@@ -141,7 +165,7 @@ function computeBBoxes(tmplData, W, H) {
 function generateShowcase() {
   const hasClothing = state.shirt || state.pants;
 
-  /* Empty state → outline */
+  /* Empty state → show outline */
   if (!hasClothing) {
     if (state.outline) return imageToCanvas(state.outline);
     const blank = document.createElement('canvas');
@@ -159,7 +183,7 @@ function generateShowcase() {
   const W = state.template.naturalWidth;
   const H = state.template.naturalHeight;
 
-  /* Rasterize template so we can read pixels */
+  /* Rasterize template */
   const tmpCanvas = document.createElement('canvas');
   tmpCanvas.width  = W;
   tmpCanvas.height = H;
@@ -168,7 +192,7 @@ function generateShowcase() {
   tmpCtx.drawImage(state.template, 0, 0);
   const tmpData = tmpCtx.getImageData(0, 0, W, H).data;
 
-  /* Bounding boxes for each colored region */
+  /* Compute bounding boxes with tolerance */
   const bboxes = computeBBoxes(tmpData, W, H);
 
   /* Rasterize uploaded clothing */
@@ -182,49 +206,48 @@ function generateShowcase() {
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
 
-  /* Optional background */
+  /* 1. Optional background image */
   if (state.background) {
     ctx.drawImage(state.background.img, 0, 0, W, H);
   }
 
-  /* Per-pixel fill */
+  /* 2. Base outline layer (branding + character silhouette) */
+  if (CONFIG.showOutlineBase && state.outline) {
+    ctx.drawImage(state.outline, 0, 0, W, H);
+  }
+
+  /* 3. Read base pixels (background + outline) so we composite on top */
   const out = ctx.getImageData(0, 0, W, H);
 
+  /* 4. Walk template pixels and paint anchor regions */
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
       const i = (y * W + x) * 4;
-      const a = tmpData[i + 3];
 
-      /* Transparent → leave as-is (background shows) */
-      if (a === 0) continue;
+      /* Template transparent → don't touch base */
+      if (tmpData[i + 3] === 0) continue;
 
-      const key = `${tmpData[i]},${tmpData[i + 1]},${tmpData[i + 2]}`;
-      const anchor = ANCHORS[key];
+      /* Match against anchors with tolerance */
+      const match = matchAnchor(tmpData[i], tmpData[i + 1], tmpData[i + 2]);
 
-      /* Non-anchor pixel → copy from template (branding text) */
-      if (!anchor) {
-        out.data[i]     = tmpData[i];
-        out.data[i + 1] = tmpData[i + 1];
-        out.data[i + 2] = tmpData[i + 2];
-        out.data[i + 3] = tmpData[i + 3];
-        continue;
-      }
+      /* Non-anchor pixel → skip (leaves base visible, no white borders) */
+      if (!match) continue;
 
       /* Anchor pixel → fill with clothing or skin tone */
-      const bb = bboxes[key];
+      const bb = bboxes[match.key];
       if (!bb || !bb.found) continue;
 
       const bbW = bb.maxX - bb.minX + 1;
       const bbH = bb.maxY - bb.minY + 1;
-      const u = (x - bb.minX) / bbW;   // 0..1 across region
-      const v = (y - bb.minY) / bbH;   // 0..1 down region
+      const u = (x - bb.minX) / bbW;
+      const v = (y - bb.minY) / bbH;
 
       let src    = null;
       let coords = null;
       if (state.shirt && shirtPix) {
-        src = shirtPix; coords = anchor.shirt;
+        src = shirtPix; coords = match.mapping.shirt;
       } else if (state.pants && pantsPix) {
-        src = pantsPix; coords = anchor.pants;
+        src = pantsPix; coords = match.mapping.pants;
       }
 
       if (src && coords) {
@@ -236,7 +259,6 @@ function generateShowcase() {
         out.data[i + 2] = src.data[si + 2];
         out.data[i + 3] = 255;
       } else {
-        /* Live-read skin tone so picker changes apply instantly */
         const sk = CONFIG.skinTone;
         out.data[i]     = sk.r;
         out.data[i + 1] = sk.g;
@@ -313,17 +335,14 @@ document.querySelectorAll('[data-clear]').forEach(btn => {
   const presets = document.querySelectorAll('.preset');
   if (!picker) return;
 
-  /* Initial value from CONFIG */
   picker.value = rgbToHex(CONFIG.skinTone);
 
-  /* Live changes from the color input */
   picker.addEventListener('input', e => {
     CONFIG.skinTone = hexToRgb(e.target.value);
     presets.forEach(p => p.classList.remove('active'));
     refresh();
   });
 
-  /* Preset swatches */
   presets.forEach(btn => {
     btn.addEventListener('click', () => {
       const hex = btn.dataset.color;
@@ -335,7 +354,6 @@ document.querySelectorAll('[data-clear]').forEach(btn => {
     });
   });
 
-  /* Mark the default swatch as active */
   presets.forEach(btn => {
     if (btn.dataset.color.toLowerCase() === rgbToHex(CONFIG.skinTone).toLowerCase()) {
       btn.classList.add('active');
