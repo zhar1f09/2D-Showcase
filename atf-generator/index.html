@@ -23,33 +23,20 @@
             <div class="settings">
                 <h2 class="settings__title">Settings</h2>
                 <div class="setting">
-                    <p class="setting__name">
-                        Shirt: <span class="setting__display" data-display="shirt"></span>
-                    </p>
-                    <button class="setting__button" data-input-type="changeSetting" data-setting="shirt">
-                        Upload
-                    </button>
+                    <p class="setting__name">Shirt: <span class="setting__display" data-display="shirt"></span></p>
+                    <button class="setting__button" data-input-type="changeSetting" data-setting="shirt">Upload</button>
                 </div>
                 <div class="setting">
-                    <p class="setting__name">
-                        Pants: <span class="setting__display" data-display="pants"></span>
-                    </p>
-                    <button class="setting__button" data-input-type="changeSetting" data-setting="pants">
-                        Upload
-                    </button>
+                    <p class="setting__name">Pants: <span class="setting__display" data-display="pants"></span></p>
+                    <button class="setting__button" data-input-type="changeSetting" data-setting="pants">Upload</button>
                 </div>
                 <div class="setting">
-                    <p class="setting__name">
-                        Template (Optional): <span class="setting__display" data-display="template"></span>
-                    </p>
-                    <button class="setting__button" data-input-type="changeSetting" data-setting="template">
-                        Upload
-                    </button>
+                    <p class="setting__name">Template (Optional): <span class="setting__display" data-display="template"></span></p>
+                    <button class="setting__button" data-input-type="changeSetting" data-setting="template">Upload</button>
                 </div>
                 
-                <!-- NEW: Color Palette instead of text input -->
                 <div class="setting setting--vertical">
-                    <p class="setting__name">Background Color:</p>
+                    <p class="setting__name">Skin Color:</p>
                     <div class="color-palette" id="colorPalette">
                         <div class="color-swatch active" data-color="#1b1b1b" style="background: #1b1b1b"></div>
                         <div class="color-swatch" data-color="#ffffff" style="background: #ffffff"></div>
@@ -60,14 +47,11 @@
                         <div class="color-swatch" data-color="#884B24" style="background: #884B24"></div>
                         <div class="color-swatch" data-color="#593123" style="background: #593123"></div>
                     </div>
-                    <!-- Hidden input to keep the old code working -->
                     <input type="hidden" data-display="color" data-input-type="changeSetting" data-setting="color" value="#1b1b1b" />
                 </div>
 
                 <div class="setting">
-                    <button class="setting__button setting__button--generate" data-input-type="generate">
-                        Generate Showcase
-                    </button>
+                    <button class="setting__button setting__button--generate" data-input-type="generate">Generate Showcase</button>
                 </div>
             </div>
             
@@ -96,9 +80,7 @@
             </div>
         </main>
 
-        <!-- SYNC & COLOR LOGIC -->
         <script>
-            // 1. Color Palette Logic
             const swatches = document.querySelectorAll('.color-swatch');
             const colorInput = document.querySelector('input[data-display="color"]');
             
@@ -109,47 +91,9 @@
                     const color = swatch.getAttribute('data-color');
                     colorInput.value = color;
                     
-                    // Trigger the ATF tool's change event
                     const event = new Event('input', { bubbles: true });
                     colorInput.dispatchEvent(event);
                 });
-            });
-
-            // 2. Listen for incoming files from the 3D tool
-            window.addEventListener('message', (event) => {
-                if (event.data.type === 'LOAD_IMAGE') {
-                    const { role, base64 } = event.data;
-                    
-                    // Fetch the image from the base64 string
-                    fetch(base64)
-                        .then(res => res.blob())
-                        .then(blob => {
-                            // Create a fake file object
-                            const file = new File([blob], `${role}.png`, { type: 'image/png' });
-                            
-                            // Find the file input for this role and inject the file
-                            const button = document.querySelector(`button[data-setting="${role}"]`);
-                            if (button) {
-                                // Simulate the file upload click process
-                                const changeEvent = new Event('change', { bubbles: true });
-                                // We manually trigger ATF's internal upload function
-                                const dt = new DataTransfer();
-                                dt.items.add(file);
-                                
-                                // The ATF code listens to the button click, so we trigger it
-                                button.click();
-                                
-                                // Wait a tiny bit for the file dialog bypass and set the file
-                                setTimeout(() => {
-                                    const fileInput = document.querySelector('input[type="file"]');
-                                    if (fileInput) {
-                                        fileInput.files = dt.files;
-                                        fileInput.dispatchEvent(changeEvent);
-                                    }
-                                }, 100);
-                            }
-                        });
-                }
             });
         </script>
     </body>

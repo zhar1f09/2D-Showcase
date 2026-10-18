@@ -12,15 +12,23 @@ button {
 	border: none;
 }
 
+input {
+	background-color: transparent;
+	border: none;
+	outline: none;
+}
+
 body, html {
 	height: 100%;
 }
 
+/* Scrollbar */
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: none; }
 ::-webkit-scrollbar-thumb { background: rgb(255, 255, 255, 0.2); }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
 
+/* Background */
 body {
 	background-color: #1b1b1b;
     overflow-y: auto;
@@ -47,6 +55,7 @@ header {
     font-weight: 700;
 }
 
+/* Layout */
 main {
 	display: flex;
 	justify-content: center;
@@ -62,6 +71,7 @@ main > *:not(.tutorial) {
     overflow: hidden;
 }
 
+/* Settings Panel */
 .settings {
 	min-width: 320px;
 	padding: 1.5rem;
@@ -108,6 +118,7 @@ main > *:not(.tutorial) {
     margin-left: 0.5rem;
 }
 
+/* Buttons */
 .setting__button {
 	padding: 0.5rem 1rem;
 	border: 2px solid #E74C3C;
@@ -136,7 +147,7 @@ main > *:not(.tutorial) {
     color: white;
 }
 
-/* NEW: Color Palette Styles */
+/* Color Palette */
 .color-palette {
     display: flex;
     gap: 0.5rem;
@@ -162,6 +173,7 @@ main > *:not(.tutorial) {
     transform: scale(1.1);
 }
 
+/* Tutorial */
 .tutorial {
 	width: 100%;
 	max-width: 800px;
@@ -171,18 +183,18 @@ main > *:not(.tutorial) {
 .tutorial__title {
 	margin-bottom: 1.5rem;
 	font-size: 1.8rem;
-    color: #E74C3C; /* Custom Red for headers */
+    color: #E74C3C;
 }
 
 .tutorial__subtitle {
 	margin-bottom: 1rem;
 	font-size: 1.3rem;
 	font-weight: 500;
-    color: #E74C3C; /* Custom Red for subtitles */
+    color: #E74C3C;
 }
 
 .tutorial__text {
-	color: rgba(255, 255, 255, 0.8); /* White text */
+	color: white;
 	font-weight: 300;
 	line-height: 1.7;
     font-size: 0.95rem;
@@ -206,13 +218,13 @@ main > *:not(.tutorial) {
 }
 
 .tutorial__list__element {
-	color: rgba(255, 255, 255, 0.8); /* White text */
+	color: white;
 	font-weight: 400;
     font-size: 0.95rem;
 }
 
 .tutorial__list__element code {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
     font-family: monospace;
