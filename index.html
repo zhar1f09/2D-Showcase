@@ -17,6 +17,11 @@
         .viewer { flex: 1; position: relative; background: radial-gradient(circle at center, #2d3235, #141617); }
         iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         iframe.active { opacity: 1; pointer-events: auto; }
+        
+        /* Toast Notifications */
+        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: #2d3235; color: white; padding: 12px 20px; border-left: 4px solid #E74C3C; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); font-size: 14px; transform: translateX(120%); animation: slideIn 0.3s forwards; }
+        @keyframes slideIn { to { transform: translateX(0); } }
     </style>
 </head>
 <body>
@@ -34,9 +39,20 @@
         <iframe src="3d-previewer/index.html" id="view-3d" class="active" allowfullscreen></iframe>
         <iframe src="atf-generator/index.html" id="view-2d"></iframe>
     </main>
+    <div class="toast-container" id="toastContainer"></div>
+
     <script>
         const buttons = document.querySelectorAll('.mode-btn');
         const frames = document.querySelectorAll('iframe');
+        const toastContainer = document.getElementById('toastContainer');
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = message;
+            toastContainer.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
 
         buttons.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -55,6 +71,7 @@
                 frames.forEach(frame => {
                     frame.contentWindow.postMessage({ type: 'LOAD_IMAGE', role, base64 }, '*');
                 });
+                showToast(`Synced ${role} between tools!`);
             }
         });
 

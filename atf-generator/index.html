@@ -1,100 +1,101 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        </style>
-        <link rel="stylesheet" href="style.css" />
-        <script src="main.js" type="module" defer></script>
-        <title>Nocturne Designs Showcase</title>
-    </head>
-    <body>
-        <header>
-            <h1 class="header__title">
-                Nocturne Designs
-                <span>Showcase Generator</span>
-            </h1>
-        </header>
-        <main>
-            <canvas data-screen></canvas>
-            <div class="settings">
-                <h2 class="settings__title">Settings</h2>
-                <div class="setting">
-                    <p class="setting__name">Shirt: <span class="setting__display" data-display="shirt"></span></p>
-                    <button class="setting__button" data-input-type="changeSetting" data-setting="shirt">Upload</button>
-                </div>
-                <div class="setting">
-                    <p class="setting__name">Pants: <span class="setting__display" data-display="pants"></span></p>
-                    <button class="setting__button" data-input-type="changeSetting" data-setting="pants">Upload</button>
-                </div>
-                <div class="setting">
-                    <p class="setting__name">Template (Optional): <span class="setting__display" data-display="template"></span></p>
-                    <button class="setting__button" data-input-type="changeSetting" data-setting="template">Upload</button>
-                </div>
-                
-                <div class="setting setting--vertical">
-                    <p class="setting__name">Skin Color:</p>
-                    <div class="color-palette" id="colorPalette">
-                        <div class="color-swatch active" data-color="#1b1b1b" style="background: #1b1b1b"></div>
-                        <div class="color-swatch" data-color="#ffffff" style="background: #ffffff"></div>
-                        <div class="color-swatch" data-color="#FFD8C2" style="background: #FFD8C2"></div>
-                        <div class="color-swatch" data-color="#E1AF92" style="background: #E1AF92"></div>
-                        <div class="color-swatch" data-color="#CE926A" style="background: #CE926A"></div>
-                        <div class="color-swatch" data-color="#B87754" style="background: #B87754"></div>
-                        <div class="color-swatch" data-color="#884B24" style="background: #884B24"></div>
-                        <div class="color-swatch" data-color="#593123" style="background: #593123"></div>
-                    </div>
-                    <input type="hidden" data-display="color" data-input-type="changeSetting" data-setting="color" value="#1b1b1b" />
-                </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nocturne Designs - 3D Previewer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="stage">
+      <nav class="topbar">
+        <a class="brand" href="./"><span class="brand-mark"></span><span>Nocturne Designs</span></a>
+      </nav>
 
-                <div class="setting">
-                    <button class="setting__button setting__button--generate" data-input-type="generate">Generate Showcase</button>
-                </div>
-            </div>
-            
-            <div class="tutorial">
-                <h2 class="tutorial__title">How to use the Custom Template System</h2>
-                <p class="tutorial__text">
-                    If you want to use your own custom layout, you need to add special "anchor pixels" to your image. The system scans your template for these exact colors to know where to place the clothing.
-                </p>
-                
-                <h3 class="tutorial__subtitle">Color Code</h3>
-                <p class="tutorial__text">
-                    Place single 1x1 pixels of these exact RGB values on your template. 
-                    <strong>Warning: Do not use these specific colors anywhere else in your image, or the clothing will duplicate.</strong>
-                </p>
-                <ul class="tutorial__list">
-                    <li class="tutorial__list__element">🔴 <code>rgb(255, 0, 0)</code> - Right Arm</li>
-                    <li class="tutorial__list__element">🟢 <code>rgb(0, 255, 0)</code> - Front Torso</li>
-                    <li class="tutorial__list__element">🔵 <code>rgb(0, 0, 255)</code> - Back Torso</li>
-                    <li class="tutorial__list__element">🟡 <code>rgb(255, 255, 0)</code> - Left Arm</li>
-                </ul>
+      <section class="hero">
+        <!-- Uploads -->
+        <section class="upload-panel">
+          <div class="panel-heading">
+            <p>Nocturne Designs</p>
+            <h1>Upload. Preview. Rotate.</h1>
+          </div>
+          <div class="drop-grid">
+            <label class="drop-card" for="shirtInput" id="shirtDrop">
+              <input id="shirtInput" type="file" accept="image/*" data-setting="shirt" />
+              <span class="drop-icon">S</span>
+              <span class="drop-title">Upload Shirt</span>
+            </label>
+            <label class="drop-card" for="pantsInput" id="pantsDrop">
+              <input id="pantsInput" type="file" accept="image/*" data-setting="pants" />
+              <span class="drop-icon">P</span>
+              <span class="drop-title">Upload Pants</span>
+            </label>
+          </div>
+          
+          <!-- Camera Presets -->
+          <div class="actions" style="flex-wrap: wrap;">
+            <button class="control-button" id="camFront" type="button">Front</button>
+            <button class="control-button" id="camBack" type="button">Back</button>
+            <button class="control-button" id="camLeft" type="button">Left</button>
+            <button class="control-button" id="camRight" type="button">Right</button>
+            <button class="control-button ghost" id="resetView" type="button">Reset</button>
+          </div>
+        </section>
 
-                <h3 class="tutorial__subtitle">Downloading</h3>
-                <p class="tutorial__text">
-                    Because this tool runs entirely in your browser, the download won't start automatically. Simply <strong>Right-Click</strong> on the generated image and select <strong>"Save image as..."</strong> to download your showcase.
-                </p>
-            </div>
-        </main>
+        <section class="viewer-card">
+          <div id="viewer" class="viewer"></div>
+          <div class="viewer-status" id="viewerStatus">Loading 3D model</div>
+          <div class="viewer-hint">Drag to rotate</div>
+        </section>
+      </section>
+    </main>
 
-        <script>
-            const swatches = document.querySelectorAll('.color-swatch');
-            const colorInput = document.querySelector('input[data-display="color"]');
-            
-            swatches.forEach(swatch => {
-                swatch.addEventListener('click', () => {
-                    swatches.forEach(s => s.classList.remove('active'));
-                    swatch.classList.add('active');
-                    const color = swatch.getAttribute('data-color');
-                    colorInput.value = color;
-                    
-                    const event = new Event('input', { bubbles: true });
-                    colorInput.dispatchEvent(event);
-                });
-            });
-        </script>
-    </body>
+    <script type="importmap">
+      { "imports": { "three": "https://unpkg.com/three@0.161.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/" } }
+    </script>
+    <script type="module" src="app.js"></script>
+    
+    <script>
+      document.querySelectorAll('input[type="file"]').forEach(input => {
+          input.addEventListener('change', (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = (ev) => {
+                  const role = input.getAttribute('data-setting');
+                  if (role) window.parent.postMessage({ type: 'UPLOAD_IMAGE', role, base64: ev.target.result }, '*');
+              };
+              reader.readAsDataURL(file);
+          });
+      });
+
+      window.addEventListener('message', (event) => {
+          if (event.data.type === 'LOAD_IMAGE') {
+              const { role, base64 } = event.data;
+              fetch(base64).then(res => res.blob()).then(blob => {
+                  const file = new File([blob], `${role}.png`, { type: 'image/png' });
+                  const dt = new DataTransfer();
+                  dt.items.add(file);
+                  const input = document.getElementById(`${role}Input`);
+                  if (input) {
+                      input.files = dt.files;
+                      input.dispatchEvent(new Event('change', { bubbles: true }));
+                  }
+              });
+          }
+      });
+
+      // Wait for the 3D scene to load, then bind camera buttons
+      window.addEventListener('load', () => {
+          setTimeout(() => {
+              // We can't access Three.js variables directly from the module, 
+              // so we send keyboard/mouse events or look for custom events in BennyModel's app.js
+              // For now, this triggers a reset which is universally supported by their code.
+              const resetBtn = document.getElementById('resetView');
+              if (resetBtn) resetBtn.click();
+          }, 2000);
+      });
+    </script>
+  </body>
 </html>

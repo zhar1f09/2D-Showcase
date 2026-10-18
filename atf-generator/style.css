@@ -22,18 +22,19 @@ body, html {
 	height: 100%;
 }
 
-/* Scrollbar */
+/* Custom Scrollbar */
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: none; }
 ::-webkit-scrollbar-thumb { background: rgb(255, 255, 255, 0.2); }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
 
-/* Background */
+/* Main Background */
 body {
 	background-color: #1b1b1b;
     overflow-y: auto;
 }
 
+/* Header */
 header {
 	display: grid;
 	place-content: center;
@@ -118,19 +119,24 @@ main > *:not(.tutorial) {
     margin-left: 0.5rem;
 }
 
-/* Buttons */
+/* 
+   Upload Buttons (Drop-zone styling)
+   Replaced static buttons with a dashed border accent 
+*/
 .setting__button {
 	padding: 0.5rem 1rem;
-	border: 2px solid #E74C3C;
-	border-radius: 30px;
+	border: 2px dashed #E74C3C;
+	border-radius: 8px;
 	color: #E74C3C;
     font-weight: 600;
     transition: all 0.2s;
+    background: rgba(231, 76, 60, 0.05);
 }
 
 .setting__button:hover {
-    background-color: #E74C3C;
+    background-color: rgba(231, 76, 60, 0.2);
     color: white;
+    border-style: solid;
 }
 
 .setting__button--generate {
@@ -140,6 +146,8 @@ main > *:not(.tutorial) {
 	font-size: 1.1rem;
 	font-weight: 600;
     width: 100%;
+    border-radius: 30px;
+    border-style: solid;
 }
 
 .setting__button--generate:hover {
@@ -147,7 +155,10 @@ main > *:not(.tutorial) {
     color: white;
 }
 
-/* Color Palette */
+/* 
+   Color Palette 
+   Matches the Roblox skin tones 
+*/
 .color-palette {
     display: flex;
     gap: 0.5rem;
@@ -162,6 +173,7 @@ main > *:not(.tutorial) {
     cursor: pointer;
     border: 2px solid transparent;
     transition: transform 0.2s, border-color 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .color-swatch:hover {
@@ -171,6 +183,7 @@ main > *:not(.tutorial) {
 .color-swatch.active {
     border-color: white;
     transform: scale(1.1);
+    box-shadow: 0 0 0 2px #E74C3C;
 }
 
 /* Tutorial */
