@@ -16,10 +16,8 @@ export default function createShowcase(settings) {
             const dy = y + offsetY
 
             if (image) {
-                // Draw clothing if uploaded
                 context.drawImage(image, sourceX, sourceY, width, 128, dx, dy, width, 128)
             } else {
-                // Fill with selected skin color if NO clothing is uploaded
                 context.fillStyle = settings.color || '#1b1b1b'
                 context.fillRect(dx, dy, width, 128)
             }
