@@ -124,8 +124,9 @@
     </script>
     <script type="module" src="app.js"></script>
     
-    <!-- SYNC SCRIPT: Sends uploads to the main page -->
+    <!-- FIXED SYNC SCRIPT -->
     <script>
+      // 1. Send uploads to main page
       document.querySelectorAll('input[type="file"]').forEach(input => {
           input.addEventListener('change', (e) => {
               const file = e.target.files[0];
@@ -139,6 +140,29 @@
               };
               reader.readAsDataURL(file);
           });
+      });
+
+      // 2. Listen for incoming files from the 2D tool
+      window.addEventListener('message', (event) => {
+          if (event.data.type === 'LOAD_IMAGE') {
+              const { role, base64 } = event.data;
+              
+              fetch(base64)
+                  .then(res => res.blob())
+                  .then(blob => {
+                      const file = new File([blob], `${role}.png`, { type: 'image/png' });
+                      const dt = new DataTransfer();
+                      dt.items.add(file);
+                      
+                      // Find the correct input (shirtInput or pantsInput)
+                      const input = document.getElementById(`${role}Input`);
+                      if (input) {
+                          input.files = dt.files;
+                          // Tell BennyModel's 3D viewer to update the texture
+                          input.dispatchEvent(new Event('change', { bubbles: true }));
+                      }
+                  });
+          }
       });
     </script>
   </body>

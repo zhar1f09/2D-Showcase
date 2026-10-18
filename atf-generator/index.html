@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         </style>
         <link rel="stylesheet" href="style.css" />
         <script src="main.js" type="module" defer></script>
@@ -46,10 +46,24 @@
                         Upload
                     </button>
                 </div>
-                <div class="setting">
+                
+                <!-- NEW: Color Palette instead of text input -->
+                <div class="setting setting--vertical">
                     <p class="setting__name">Background Color:</p>
-                    <input type="text" spellcheck="false" class="setting__text-input" data-display="color" data-input-type="changeSetting" data-setting="color" />
+                    <div class="color-palette" id="colorPalette">
+                        <div class="color-swatch active" data-color="#1b1b1b" style="background: #1b1b1b"></div>
+                        <div class="color-swatch" data-color="#ffffff" style="background: #ffffff"></div>
+                        <div class="color-swatch" data-color="#FFD8C2" style="background: #FFD8C2"></div>
+                        <div class="color-swatch" data-color="#E1AF92" style="background: #E1AF92"></div>
+                        <div class="color-swatch" data-color="#CE926A" style="background: #CE926A"></div>
+                        <div class="color-swatch" data-color="#B87754" style="background: #B87754"></div>
+                        <div class="color-swatch" data-color="#884B24" style="background: #884B24"></div>
+                        <div class="color-swatch" data-color="#593123" style="background: #593123"></div>
+                    </div>
+                    <!-- Hidden input to keep the old code working -->
+                    <input type="hidden" data-display="color" data-input-type="changeSetting" data-setting="color" value="#1b1b1b" />
                 </div>
+
                 <div class="setting">
                     <button class="setting__button setting__button--generate" data-input-type="generate">
                         Generate Showcase
@@ -81,21 +95,61 @@
                 </p>
             </div>
         </main>
+
+        <!-- SYNC & COLOR LOGIC -->
         <script>
-            // Send uploads to parent
-            document.querySelectorAll('input[type="file"]').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        const setting = input.getAttribute('data-setting');
-                        if (setting === 'shirt' || setting === 'pants') {
-                            window.parent.postMessage({ type: 'UPLOAD_IMAGE', role: setting, base64: ev.target.result }, '*');
-                        }
-                    };
-                    reader.readAsDataURL(file);
+            // 1. Color Palette Logic
+            const swatches = document.querySelectorAll('.color-swatch');
+            const colorInput = document.querySelector('input[data-display="color"]');
+            
+            swatches.forEach(swatch => {
+                swatch.addEventListener('click', () => {
+                    swatches.forEach(s => s.classList.remove('active'));
+                    swatch.classList.add('active');
+                    const color = swatch.getAttribute('data-color');
+                    colorInput.value = color;
+                    
+                    // Trigger the ATF tool's change event
+                    const event = new Event('input', { bubbles: true });
+                    colorInput.dispatchEvent(event);
                 });
+            });
+
+            // 2. Listen for incoming files from the 3D tool
+            window.addEventListener('message', (event) => {
+                if (event.data.type === 'LOAD_IMAGE') {
+                    const { role, base64 } = event.data;
+                    
+                    // Fetch the image from the base64 string
+                    fetch(base64)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            // Create a fake file object
+                            const file = new File([blob], `${role}.png`, { type: 'image/png' });
+                            
+                            // Find the file input for this role and inject the file
+                            const button = document.querySelector(`button[data-setting="${role}"]`);
+                            if (button) {
+                                // Simulate the file upload click process
+                                const changeEvent = new Event('change', { bubbles: true });
+                                // We manually trigger ATF's internal upload function
+                                const dt = new DataTransfer();
+                                dt.items.add(file);
+                                
+                                // The ATF code listens to the button click, so we trigger it
+                                button.click();
+                                
+                                // Wait a tiny bit for the file dialog bypass and set the file
+                                setTimeout(() => {
+                                    const fileInput = document.querySelector('input[type="file"]');
+                                    if (fileInput) {
+                                        fileInput.files = dt.files;
+                                        fileInput.dispatchEvent(changeEvent);
+                                    }
+                                }, 100);
+                            }
+                        });
+                }
             });
         </script>
     </body>

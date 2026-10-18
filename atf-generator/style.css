@@ -12,12 +12,6 @@ button {
 	border: none;
 }
 
-input {
-	background-color: transparent;
-	border: none;
-	outline: none;
-}
-
 body, html {
 	height: 100%;
 }
@@ -43,16 +37,14 @@ header {
 	line-height: 2rem;
 	text-transform: uppercase;
 	text-align: center;
+    color: white;
 }
 
 .header__title span {
 	line-height: 2.5rem;
-	color: transparent;
-	background: linear-gradient(90deg, #ff0000 0%, #7a0000 100%);
-	background-clip: text;
-	-moz-background-clip: text;
-	-webkit-background-clip: text;
+	color: #E74C3C;
 	font-size: 2.5rem;
+    font-weight: 700;
 }
 
 main {
@@ -65,13 +57,13 @@ main {
 }
 
 main > *:not(.tutorial) {
-	border: 2px solid rgba(255, 255, 255, 0.2);
+	border: 2px solid rgba(255, 255, 255, 0.1);
 	border-radius: 15px;
     overflow: hidden;
 }
 
 .settings {
-	min-width: 300px;
+	min-width: 320px;
 	padding: 1.5rem;
 }
 
@@ -79,12 +71,19 @@ main > *:not(.tutorial) {
 	margin-bottom: 2rem;
 	font-size: 1.25rem;
 	font-weight: 500;
+    color: white;
 }
 
 .setting {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+}
+
+.setting--vertical {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
 }
 
 .setting:not(:last-child) {
@@ -94,8 +93,9 @@ main > *:not(.tutorial) {
 }
  
 .setting__name {
-	font-weight: 300;
+	font-weight: 400;
     font-size: 0.95rem;
+    color: white;
 }
 
 .setting__display {
@@ -110,21 +110,21 @@ main > *:not(.tutorial) {
 
 .setting__button {
 	padding: 0.5rem 1rem;
-	border: 2px solid #ff0000;
+	border: 2px solid #E74C3C;
 	border-radius: 30px;
-	color: #ff0000;
+	color: #E74C3C;
     font-weight: 600;
     transition: all 0.2s;
 }
 
 .setting__button:hover {
-    background-color: #ff0000;
-    color: #1b1b1b;
+    background-color: #E74C3C;
+    color: white;
 }
 
 .setting__button--generate {
 	border: none;
-	background: linear-gradient(90deg, #ff0000 0%, #7a0000 100%);
+	background-color: #E74C3C;
 	color: white;
 	font-size: 1.1rem;
 	font-weight: 600;
@@ -132,18 +132,34 @@ main > *:not(.tutorial) {
 }
 
 .setting__button--generate:hover {
-    opacity: 0.8;
+    background-color: #c0392b;
     color: white;
 }
 
-.setting__text-input {
-	width: 80px;
-	margin-left: 0.5rem;
-	border-bottom: 2px solid #ff0000;
-	color: #ff0000;
-	letter-spacing: 1px;
-	font-weight: 600;
-    text-align: right;
+/* NEW: Color Palette Styles */
+.color-palette {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.color-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.color-swatch:hover {
+    transform: scale(1.1);
+}
+
+.color-swatch.active {
+    border-color: white;
+    transform: scale(1.1);
 }
 
 .tutorial {
@@ -155,17 +171,18 @@ main > *:not(.tutorial) {
 .tutorial__title {
 	margin-bottom: 1.5rem;
 	font-size: 1.8rem;
-    color: #ff0000;
+    color: #E74C3C; /* Custom Red for headers */
 }
 
 .tutorial__subtitle {
 	margin-bottom: 1rem;
 	font-size: 1.3rem;
 	font-weight: 500;
+    color: #E74C3C; /* Custom Red for subtitles */
 }
 
 .tutorial__text {
-	color: rgba(255, 255, 255, 0.7);
+	color: rgba(255, 255, 255, 0.8); /* White text */
 	font-weight: 300;
 	line-height: 1.7;
     font-size: 0.95rem;
@@ -189,7 +206,7 @@ main > *:not(.tutorial) {
 }
 
 .tutorial__list__element {
-	color: rgba(255, 255, 255, 0.85);
+	color: rgba(255, 255, 255, 0.8); /* White text */
 	font-weight: 400;
     font-size: 0.95rem;
 }
@@ -199,4 +216,5 @@ main > *:not(.tutorial) {
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
     font-family: monospace;
+    color: #E74C3C;
 }
