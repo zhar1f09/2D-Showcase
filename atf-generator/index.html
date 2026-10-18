@@ -15,7 +15,7 @@
         <header>
             <h1 class="header__title">
                 Nocturne Designs
-                <span>Showcase</span>
+                <span>Showcase Generator</span>
             </h1>
         </header>
         <main>
@@ -26,11 +26,7 @@
                     <p class="setting__name">
                         Shirt: <span class="setting__display" data-display="shirt"></span>
                     </p>
-                    <button
-                        class="setting__button"
-                        data-input-type="changeSetting"
-                        data-setting="shirt"
-                    >
+                    <button class="setting__button" data-input-type="changeSetting" data-setting="shirt">
                         Upload
                     </button>
                 </div>
@@ -38,11 +34,7 @@
                     <p class="setting__name">
                         Pants: <span class="setting__display" data-display="pants"></span>
                     </p>
-                    <button
-                        class="setting__button"
-                        data-input-type="changeSetting"
-                        data-setting="pants"
-                    >
+                    <button class="setting__button" data-input-type="changeSetting" data-setting="pants">
                         Upload
                     </button>
                 </div>
@@ -50,73 +42,61 @@
                     <p class="setting__name">
                         Template (Optional): <span class="setting__display" data-display="template"></span>
                     </p>
-                    <button
-                        class="setting__button"
-                        data-input-type="changeSetting"
-                        data-setting="template"
-                    >
+                    <button class="setting__button" data-input-type="changeSetting" data-setting="template">
                         Upload
                     </button>
                 </div>
                 <div class="setting">
-                    <p class="setting__name">Color:</p>
-                    <input
-                        type="text"
-                        spellcheck="false"
-                        class="setting__text-input"
-                        data-display="color"
-                        data-input-type="changeSetting"
-                        data-setting="color"
-                    />
+                    <p class="setting__name">Background Color:</p>
+                    <input type="text" spellcheck="false" class="setting__text-input" data-display="color" data-input-type="changeSetting" data-setting="color" />
                 </div>
                 <div class="setting">
-                    <button
-                        class="setting__button setting__button--generate"
-                        data-input-type="generate"
-                    >
-                        Generate
+                    <button class="setting__button setting__button--generate" data-input-type="generate">
+                        Generate Showcase
                     </button>
                 </div>
             </div>
+            
             <div class="tutorial">
-                <h2 class="tutorial__title">How to use the template system</h2>
+                <h2 class="tutorial__title">How to use the Custom Template System</h2>
                 <p class="tutorial__text">
-                    In order to allow you to add only the sides of the showcase that you want, this
-                    tool uses a system which requires you to do some small modifications to your
-                    showcase:
+                    If you want to use your own custom layout, you need to add special "anchor pixels" to your image. The system scans your template for these exact colors to know where to place the clothing.
                 </p>
+                
                 <h3 class="tutorial__subtitle">Color Code</h3>
                 <p class="tutorial__text">
-                    This system involves a color code in which pixels of certain colors determine
-                    where you want a certain side of your showcase to appear (like the side, front
-                    or back). You will have to modify your template to include pixels with these
-                    colors that are located wherever you want that side to apppear.
-                    <strong
-                        >Keep in mind that no pixel can have these specific RGB values other than
-                        these ones.</strong
-                    >
+                    Place single 1x1 pixels of these exact RGB values on your template. 
+                    <strong>Warning: Do not use these specific colors anywhere else in your image, or the clothing will duplicate.</strong>
                 </p>
-                <ol class="tutorial__list">
-                    <li class="tutorial__list__element">rgb(255, 0, 0) - Right side</li>
-                    <li class="tutorial__list__element">rgb(0, 255, 0) - Front</li>
-                    <li class="tutorial__list__element">rgb(0, 0, 255) - Back</li>
-                    <li class="tutorial__list__element">rgb(255, 255, 0) - Left side</li>
-                </ol>
-                <h3 class="tutorial__subtitle">Note</h3>
+                <ul class="tutorial__list">
+                    <li class="tutorial__list__element">🔴 <code>rgb(255, 0, 0)</code> - Right Arm</li>
+                    <li class="tutorial__list__element">🟢 <code>rgb(0, 255, 0)</code> - Front Torso</li>
+                    <li class="tutorial__list__element">🔵 <code>rgb(0, 0, 255)</code> - Back Torso</li>
+                    <li class="tutorial__list__element">🟡 <code>rgb(255, 255, 0)</code> - Left Arm</li>
+                </ul>
+
+                <h3 class="tutorial__subtitle">Downloading</h3>
                 <p class="tutorial__text">
-                    Since this is hosted on Github I can't have the showcase download automatically
-                    or add a button that starts the download.
-                    <strong
-                        >You will have to manually right click and "save as" in order to download
-                        your showcase.</strong
-                    >
+                    Because this tool runs entirely in your browser, the download won't start automatically. Simply <strong>Right-Click</strong> on the generated image and select <strong>"Save image as..."</strong> to download your showcase.
                 </p>
             </div>
-            <!-- <p class="note">
-                NOTE: Since this is hosted on Github, I can't make the download start automatically
-                or add a button that does it. You will have to manually click and "save as" in order
-                to download the showcase.
-            </p> -->
         </main>
+        <script>
+            // Send uploads to parent
+            document.querySelectorAll('input[type="file"]').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const setting = input.getAttribute('data-setting');
+                        if (setting === 'shirt' || setting === 'pants') {
+                            window.parent.postMessage({ type: 'UPLOAD_IMAGE', role: setting, base64: ev.target.result }, '*');
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+        </script>
     </body>
 </html>

@@ -93,7 +93,6 @@
 </head>
 <body>
 
-    <!-- Sidebar -->
     <aside class="sidebar">
         <div class="brand">
             <h1>Nocturne Designs</h1>
@@ -106,36 +105,56 @@
         </div>
 
         <div class="info-text">
-            <p><strong>3D Preview:</strong> Upload standard 585x559 clothing files to see them wrapped around a blocky character. Drag to rotate.</p>
+            <p><strong>Instructions:</strong> Upload a standard 585x559 clothing file in either tab. Your uploads will automatically sync between the 3D and 2D tools!</p>
             <br>
-            <p><strong>2D Showcase:</strong> Generate a flat-lay product card. Upload your custom template.png and clothing to arrange them.</p>
+            <p><strong>3D Preview:</strong> Drag the character to rotate.</p>
+            <br>
+            <p><strong>2D Showcase:</strong> Generates a flat-lay image. Right-click the final image to save.</p>
         </div>
     </aside>
 
-    <!-- Viewers -->
     <main class="viewer">
-        <!-- 3D Previewer (BennyModel) -->
         <iframe src="3d-previewer/index.html" id="view-3d" class="active" allowfullscreen></iframe>
-        
-        <!-- 2D Generator (ATF) -->
         <iframe src="atf-generator/index.html" id="view-2d"></iframe>
     </main>
 
     <script>
-        // Tab Switching Logic
         const buttons = document.querySelectorAll('.mode-btn');
         const frames = document.querySelectorAll('iframe');
 
+        // Tab switching
         buttons.forEach(btn => {
             btn.addEventListener('click', () => {
-                // Update buttons
                 buttons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
 
-                // Update iframes
                 const target = btn.dataset.target;
                 frames.forEach(f => f.classList.remove('active'));
                 document.getElementById(`view-${target}`).classList.add('active');
+            });
+        });
+
+        // Sync uploads from iframes to localStorage and the other iframe
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'UPLOAD_IMAGE') {
+                const { role, base64 } = event.data;
+                localStorage.setItem(role, base64);
+
+                frames.forEach(frame => {
+                    frame.contentWindow.postMessage({ type: 'LOAD_IMAGE', role, base64 }, '*');
+                });
+            }
+        });
+
+        // On load, check if there are saved images and send them to iframes
+        frames.forEach(frame => {
+            frame.addEventListener('load', () => {
+                ['shirt', 'pants'].forEach(role => {
+                    const base64 = localStorage.getItem(role);
+                    if (base64) {
+                        frame.contentWindow.postMessage({ type: 'LOAD_IMAGE', role, base64 }, '*');
+                    }
+                });
             });
         });
     </script>

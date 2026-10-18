@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Free Roblox blocky clothing previewer. Upload shirt and pants templates and rotate the character in 3D."
+      content="Nocturne Designs 3D Roblox blocky clothing previewer. Upload shirt and pants templates and rotate the character in 3D."
     />
-    <title>Roblox Clothing Previewer</title>
+    <title>Nocturne Designs - 3D Previewer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,16 +19,15 @@
   <body>
     <main class="stage">
       <nav class="topbar" aria-label="Primary">
-        <a class="brand" href="./" aria-label="Roblox Clothing Previewer home">
+        <a class="brand" href="./" aria-label="Nocturne Designs home">
           <span class="brand-mark"></span>
-          <span>R6 Previewer</span>
+          <span>Nocturne Designs</span>
         </a>
         <div class="nav-line" aria-hidden="true"></div>
         <div class="top-links" aria-label="Creator links">
-          <a href="https://t.me/fnquarter" target="_blank" rel="noreferrer">TG Channel</a>
-          <a href="https://t.me/itshtm" target="_blank" rel="noreferrer">@itshtm</a>
-          <a href="https://discord.gg/JB9mdcMnQd" target="_blank" rel="noreferrer">Discord</a>
-          <a href="https://github.com/BennyModel/Roblox-Clothing-Previewer" target="_blank" rel="noreferrer">GitHub</a>
+          <!-- You can update these links to your own socials if you want -->
+          <a href="#" target="_blank" rel="noreferrer">Discord</a>
+          <a href="#" target="_blank" rel="noreferrer">GitHub</a>
         </div>
       </nav>
 
@@ -54,20 +53,20 @@
 
         <section class="upload-panel" aria-label="Clothing upload controls">
           <div class="panel-heading">
-            <p>Roblox Clothing Previewer</p>
+            <p>Nocturne Designs</p>
             <h1 id="page-title">Upload. Preview. Rotate.</h1>
           </div>
 
           <div class="drop-grid">
             <label class="drop-card" for="shirtInput" id="shirtDrop">
-              <input id="shirtInput" type="file" accept="image/*" />
+              <input id="shirtInput" type="file" accept="image/*" data-setting="shirt" />
               <span class="drop-icon">S</span>
               <span class="drop-title">Upload Shirt</span>
               <span class="drop-name" id="shirtName">PNG, JPG, WEBP</span>
             </label>
 
             <label class="drop-card" for="pantsInput" id="pantsDrop">
-              <input id="pantsInput" type="file" accept="image/*" />
+              <input id="pantsInput" type="file" accept="image/*" data-setting="pants" />
               <span class="drop-icon">P</span>
               <span class="drop-title">Upload Pants</span>
               <span class="drop-name" id="pantsName">PNG, JPG, WEBP</span>
@@ -124,5 +123,23 @@
       }
     </script>
     <script type="module" src="app.js"></script>
+    
+    <!-- SYNC SCRIPT: Sends uploads to the main page -->
+    <script>
+      document.querySelectorAll('input[type="file"]').forEach(input => {
+          input.addEventListener('change', (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = (ev) => {
+                  const role = input.getAttribute('data-setting');
+                  if (role) {
+                      window.parent.postMessage({ type: 'UPLOAD_IMAGE', role, base64: ev.target.result }, '*');
+                  }
+              };
+              reader.readAsDataURL(file);
+          });
+      });
+    </script>
   </body>
 </html>

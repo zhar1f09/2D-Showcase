@@ -1,8 +1,9 @@
 * {
 	color: white;
-	font-family: 'Poppins';
+	font-family: 'Poppins', sans-serif;
 	margin: 0;
 	padding: 0;
+    box-sizing: border-box;
 }
 
 button {
@@ -21,25 +22,14 @@ body, html {
 	height: 100%;
 }
 
-::-webkit-scrollbar {
-	width: 10px;
-}
-
-::-webkit-scrollbar-track {
-	background: none;
-}
-
-::-webkit-scrollbar-thumb {
-	background: rgb(255, 255, 255, 0.5);
-}
-
-::-webkit-scrollbar-thumb:hover {
-	background: rgba(255, 255, 255, 0.3);
-}
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: none; }
+::-webkit-scrollbar-thumb { background: rgb(255, 255, 255, 0.2); }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
 
 body {
-	background: linear-gradient(135deg, #050505 0%, #1b1b1b 50%, #3a0505 100%);
-	background-attachment: fixed;
+	background-color: #1b1b1b;
+    overflow-y: auto;
 }
 
 header {
@@ -68,29 +58,21 @@ header {
 main {
 	display: flex;
 	justify-content: center;
+	align-items: flex-start;
+	gap: 3rem;
 	flex-wrap: wrap;
-	display: grid; 
-	grid-template-columns: repeat(2, min-content);
-	grid-template-rows: repeat(2, min-content);
-	padding-inline: 3rem;
+	padding: 0 3rem 5rem 3rem;
 }
 
 main > *:not(.tutorial) {
-	border: 2px solid rgba(255, 255, 255, 0.5);
+	border: 2px solid rgba(255, 255, 255, 0.2);
 	border-radius: 15px;
-}
-
-canvas {
-	grid-column: 1;
-	grid-row: 1;
+    overflow: hidden;
 }
 
 .settings {
-	grid-column: 2;
-	grid-row: 1;
-	min-width: max-content;
-	padding: 1rem;
-	margin-left: 2rem;
+	min-width: 300px;
+	padding: 1.5rem;
 }
 
 .settings__title {
@@ -105,21 +87,15 @@ canvas {
 	align-items: center;
 }
 
-.setting--template {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: flex-start;
-}
-
 .setting:not(:last-child) {
 	margin-bottom: 1rem;
 	padding-bottom: 1rem;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
  
 .setting__name {
-	font-weight: 200;
+	font-weight: 300;
+    font-size: 0.95rem;
 }
 
 .setting__display {
@@ -127,64 +103,72 @@ canvas {
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;
-	padding-right: 1rem;
-}
-
-.setting--template .setting__name {
-	margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: #888;
+    margin-left: 0.5rem;
 }
 
 .setting__button {
-	padding: 0.5rem;
+	padding: 0.5rem 1rem;
 	border: 2px solid #ff0000;
 	border-radius: 30px;
 	color: #ff0000;
+    font-weight: 600;
+    transition: all 0.2s;
 }
 
-.setting__button:not(:last-child) {
-	margin-right: 1rem;
+.setting__button:hover {
+    background-color: #ff0000;
+    color: #1b1b1b;
 }
 
 .setting__button--generate {
 	border: none;
 	background: linear-gradient(90deg, #ff0000 0%, #7a0000 100%);
 	color: white;
-	font-size: 1.2rem;
+	font-size: 1.1rem;
 	font-weight: 600;
+    width: 100%;
+}
+
+.setting__button--generate:hover {
+    opacity: 0.8;
+    color: white;
 }
 
 .setting__text-input {
-	width: 100%;
+	width: 80px;
 	margin-left: 0.5rem;
-	border-bottom: 2px solid;
+	border-bottom: 2px solid #ff0000;
 	color: #ff0000;
 	letter-spacing: 1px;
-	font-weight: 400;
+	font-weight: 600;
+    text-align: right;
 }
 
 .tutorial {
-	grid-column: 1 / span 2;
-	grid-row: 2;
-	padding-top: 1.5rem;
-	padding-bottom: 3rem;
+	width: 100%;
+	max-width: 800px;
+	padding-top: 2rem;
 }
 
 .tutorial__title {
-	margin-bottom: 2rem;
+	margin-bottom: 1.5rem;
 	font-size: 1.8rem;
+    color: #ff0000;
 }
 
 .tutorial__subtitle {
-	margin-bottom: 1.2rem;
-	font-size: 1.5rem;
+	margin-bottom: 1rem;
+	font-size: 1.3rem;
 	font-weight: 500;
 }
 
 .tutorial__text {
-	max-width: 70ch;
-	color: rgba(255, 255, 255, 0.85);
+	color: rgba(255, 255, 255, 0.7);
 	font-weight: 300;
-	line-height: 1.8rem;
+	line-height: 1.7;
+    font-size: 0.95rem;
 }
 
 .tutorial__text:not(:last-child) {
@@ -193,26 +177,26 @@ canvas {
 
 .tutorial__text strong {
 	font-weight: 500;
+    color: white;
 }
 
 .tutorial__list {
-	margin-bottom: 1.2rem;
+	margin-bottom: 1.5rem;
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
 }
 
 .tutorial__list__element {
-	margin-left: 1rem;
-	margin-bottom: 0.5rem;
-	padding-left: 0.5rem;
 	color: rgba(255, 255, 255, 0.85);
-	font-weight: 300;
+	font-weight: 400;
+    font-size: 0.95rem;
 }
 
-.note {
-	grid-column: 1;
-	grid-row: 1;
-	padding-top: 1rem;
-	color: rgb(255, 255, 255, 0.8);
-	font-size: 0.95rem;
-	font-weight: 300;
-	line-height: 1.6rem;
+.tutorial__list__element code {
+    background: rgba(255,255,255,0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
 }
