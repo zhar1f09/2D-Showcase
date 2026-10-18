@@ -22,29 +22,54 @@ export default function createShowcase(settings) {
         }
     }
 
-    function drawSkinOnSide(x, y, pixelRGB) {
-        const sideCoordinates = sideDrawingCoordinates[pixelRGB]
-        for (const coordinates of sideCoordinates) {
-            const { offsetX, offsetY, width } = coordinates
-            const dx = x + offsetX
-            const dy = y + offsetY
-
-            context.fillStyle = settings.color
-            context.fillRect(dx, dy, width, 128)
-        }
-    }
-
     function generate() {
         context.clearRect(0, 0, screen.width, screen.height)
         drawTemplate()
+        
+        // 1. Get the pixel data of the whole template at once (much faster)
+        const imageData = context.getImageData(0, 0, screen.width, screen.height).data
+        
+        // 2. Find the top-left pixel of each color
+        const foundAnchors = {}
+        
         for (let y = 0; y < screen.height; y++) {
             for (let x = 0; x < screen.width; x++) {
-                const pixelData = context.getImageData(x, y, 1, 1).data
-                const pixelRGB = `rgb(${pixelData[0]}, ${pixelData[1]}, ${pixelData[2]})`
-
-                if (!(pixelRGB in sideDrawingCoordinates)) continue
-                drawSkinOnSide(x, y, pixelRGB)
-                drawSide(x, y, pixelRGB)
+                const index = (y * screen.width + x) * 4
+                const r = imageData[index]
+                const g = imageData[index + 1]
+                const b = imageData[index + 2]
+                const a = imageData[index + 3]
+                
+                if (a === 0) continue // Skip transparent
+                
+                const pixelRGB = `rgb(${r}, ${g}, ${b})`
+                
+                // If it's an anchor color and we haven't found it yet
+                if (pixelRGB in sideDrawingCoordinates && !foundAnchors[pixelRGB]) {
+                    foundAnchors[pixelRGB] = { x, y }
+                }
+            }
+        }
+        
+        // 3. Loop through the anchors we found and draw the clothes/skin ONCE
+        for (const pixelRGB in foundAnchors) {
+            const { x, y } = foundAnchors[pixelRGB]
+            const sideCoordinates = sideDrawingCoordinates[pixelRGB]
+            
+            for (const coordinates of sideCoordinates) {
+                const { imageType, offsetX, offsetY, width } = coordinates
+                const image = settings[imageType]
+                const dx = x + offsetX
+                const dy = y + offsetY
+                
+                // If user uploaded clothes, draw the clothes.
+                // If not, draw the skin color.
+                if (image) {
+                    context.drawImage(image, coordinates.sourceX, coordinates.sourceY, width, 128, dx, dy, width, 128)
+                } else {
+                    context.fillStyle = settings.color
+                    context.fillRect(dx, dy, width, 128)
+                }
             }
         }
     }

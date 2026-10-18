@@ -1,11 +1,14 @@
 import getImageFromInput from './getImageFromInput.js'
 
 export default function createSettings() {
+    const defaultTemplate = new Image();
+    defaultTemplate.src = './media/2D.png';
+
     let settings = {
         shirt: undefined,
         pants: undefined,
-        template: undefined,
-        color: 'transparent',
+        template: defaultTemplate,
+        color: '#1b1b1b',
         changeSetting,
         subscribe,
     }
@@ -37,7 +40,7 @@ export default function createSettings() {
 
     function changeColor(command) {
         const colorElement = command.settingDisplay
-        settings.color = colorElement.value || 'transparent'
+        settings.color = colorElement.value || '#1b1b1b'
     }
 
     async function changeImageSetting(command) {

@@ -38,7 +38,8 @@ body, html {
 }
 
 body {
-	background-color: black;
+	background: linear-gradient(135deg, #050505 0%, #1b1b1b 50%, #3a0505 100%);
+	background-attachment: fixed;
 }
 
 header {
@@ -57,7 +58,7 @@ header {
 .header__title span {
 	line-height: 2.5rem;
 	color: transparent;
-	background: linear-gradient(90deg, orange 0%, rgb(0,48,255) 100%);
+	background: linear-gradient(90deg, #ff0000 0%, #7a0000 100%);
 	background-clip: text;
 	-moz-background-clip: text;
 	-webkit-background-clip: text;
@@ -135,9 +136,9 @@ canvas {
 
 .setting__button {
 	padding: 0.5rem;
-	border: 2px solid orange;
+	border: 2px solid #ff0000;
 	border-radius: 30px;
-	color: orange;
+	color: #ff0000;
 }
 
 .setting__button:not(:last-child) {
@@ -146,7 +147,7 @@ canvas {
 
 .setting__button--generate {
 	border: none;
-	background: linear-gradient(90deg, orange 0%, rgb(0,48,255) 100%);
+	background: linear-gradient(90deg, #ff0000 0%, #7a0000 100%);
 	color: white;
 	font-size: 1.2rem;
 	font-weight: 600;
@@ -156,7 +157,7 @@ canvas {
 	width: 100%;
 	margin-left: 0.5rem;
 	border-bottom: 2px solid;
-	color: orange;
+	color: #ff0000;
 	letter-spacing: 1px;
 	font-weight: 400;
 }
