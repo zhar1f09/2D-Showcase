@@ -16,10 +16,10 @@ export default function createShowcase(settings) {
             const dy = y + offsetY
 
             if (image) {
-                // If clothing is uploaded, draw the clothing
+                // Draw clothing if uploaded
                 context.drawImage(image, sourceX, sourceY, width, 128, dx, dy, width, 128)
             } else {
-                // IF NO CLOTHING, FILL WITH SKIN COLOR
+                // Draw selected skin color if no clothing is uploaded
                 context.fillStyle = settings.color || '#1b1b1b'
                 context.fillRect(dx, dy, width, 128)
             }
@@ -30,9 +30,11 @@ export default function createShowcase(settings) {
         context.clearRect(0, 0, screen.width, screen.height)
         drawTemplate()
         
+        // We read the image data AFTER drawing the template
         const imageData = context.getImageData(0, 0, screen.width, screen.height).data
         const foundAnchors = {}
         
+        // Find the first pixel of each color
         for (let y = 0; y < screen.height; y++) {
             for (let x = 0; x < screen.width; x++) {
                 const index = (y * screen.width + x) * 4
@@ -46,6 +48,7 @@ export default function createShowcase(settings) {
             }
         }
         
+        // Now, we draw the skin/clothes OVER the template
         for (const pixelRGB in foundAnchors) {
             const { x, y } = foundAnchors[pixelRGB]
             drawSide(x, y, pixelRGB)
