@@ -1,0 +1,217 @@
+* {
+	color: white;
+	font-family: 'Poppins';
+	margin: 0;
+	padding: 0;
+}
+
+button {
+	background-color: transparent;
+	cursor: pointer;
+	border: none;
+}
+
+input {
+	background-color: transparent;
+	border: none;
+	outline: none;
+}
+
+body, html {
+	height: 100%;
+}
+
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: none;
+}
+
+::-webkit-scrollbar-thumb {
+	background: rgb(255, 255, 255, 0.5);
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.3);
+}
+
+body {
+	background-color: black;
+}
+
+header {
+	display: grid;
+	place-content: center;
+	padding-block: 2rem;
+}
+
+.header__title {
+	max-width: 24ch;
+	line-height: 2rem;
+	text-transform: uppercase;
+	text-align: center;
+}
+
+.header__title span {
+	line-height: 2.5rem;
+	color: transparent;
+	background: linear-gradient(90deg, orange 0%, rgb(0,48,255) 100%);
+	background-clip: text;
+	-moz-background-clip: text;
+	-webkit-background-clip: text;
+	font-size: 2.5rem;
+}
+
+main {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	display: grid; 
+	grid-template-columns: repeat(2, min-content);
+	grid-template-rows: repeat(2, min-content);
+	padding-inline: 3rem;
+}
+
+main > *:not(.tutorial) {
+	border: 2px solid rgba(255, 255, 255, 0.5);
+	border-radius: 15px;
+}
+
+canvas {
+	grid-column: 1;
+	grid-row: 1;
+}
+
+.settings {
+	grid-column: 2;
+	grid-row: 1;
+	min-width: max-content;
+	padding: 1rem;
+	margin-left: 2rem;
+}
+
+.settings__title {
+	margin-bottom: 2rem;
+	font-size: 1.25rem;
+	font-weight: 500;
+}
+
+.setting {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.setting--template {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: flex-start;
+}
+
+.setting:not(:last-child) {
+	margin-bottom: 1rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+ 
+.setting__name {
+	font-weight: 200;
+}
+
+.setting__display {
+	max-width: 10ch;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	padding-right: 1rem;
+}
+
+.setting--template .setting__name {
+	margin-bottom: 1rem;
+}
+
+.setting__button {
+	padding: 0.5rem;
+	border: 2px solid orange;
+	border-radius: 30px;
+	color: orange;
+}
+
+.setting__button:not(:last-child) {
+	margin-right: 1rem;
+}
+
+.setting__button--generate {
+	border: none;
+	background: linear-gradient(90deg, orange 0%, rgb(0,48,255) 100%);
+	color: white;
+	font-size: 1.2rem;
+	font-weight: 600;
+}
+
+.setting__text-input {
+	width: 100%;
+	margin-left: 0.5rem;
+	border-bottom: 2px solid;
+	color: orange;
+	letter-spacing: 1px;
+	font-weight: 400;
+}
+
+.tutorial {
+	grid-column: 1 / span 2;
+	grid-row: 2;
+	padding-top: 1.5rem;
+	padding-bottom: 3rem;
+}
+
+.tutorial__title {
+	margin-bottom: 2rem;
+	font-size: 1.8rem;
+}
+
+.tutorial__subtitle {
+	margin-bottom: 1.2rem;
+	font-size: 1.5rem;
+	font-weight: 500;
+}
+
+.tutorial__text {
+	max-width: 70ch;
+	color: rgba(255, 255, 255, 0.85);
+	font-weight: 300;
+	line-height: 1.8rem;
+}
+
+.tutorial__text:not(:last-child) {
+	margin-bottom: 1rem;
+}
+
+.tutorial__text strong {
+	font-weight: 500;
+}
+
+.tutorial__list {
+	margin-bottom: 1.2rem;
+}
+
+.tutorial__list__element {
+	margin-left: 1rem;
+	margin-bottom: 0.5rem;
+	padding-left: 0.5rem;
+	color: rgba(255, 255, 255, 0.85);
+	font-weight: 300;
+}
+
+.note {
+	grid-column: 1;
+	grid-row: 1;
+	padding-top: 1rem;
+	color: rgb(255, 255, 255, 0.8);
+	font-size: 0.95rem;
+	font-weight: 300;
+	line-height: 1.6rem;
+}

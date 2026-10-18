@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Free Roblox blocky clothing previewer. Upload shirt and pants templates and rotate the character in 3D."
+    />
+    <title>Roblox Clothing Previewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="stage">
+      <nav class="topbar" aria-label="Primary">
+        <a class="brand" href="./" aria-label="Roblox Clothing Previewer home">
+          <span class="brand-mark"></span>
+          <span>R6 Previewer</span>
+        </a>
+        <div class="nav-line" aria-hidden="true"></div>
+        <div class="top-links" aria-label="Creator links">
+          <a href="https://t.me/fnquarter" target="_blank" rel="noreferrer">TG Channel</a>
+          <a href="https://t.me/itshtm" target="_blank" rel="noreferrer">@itshtm</a>
+          <a href="https://discord.gg/JB9mdcMnQd" target="_blank" rel="noreferrer">Discord</a>
+          <a href="https://github.com/BennyModel/Roblox-Clothing-Previewer" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </nav>
+
+      <section class="hero" aria-labelledby="page-title">
+        <div class="sky-orbit orbit-one" aria-hidden="true"></div>
+        <div class="sky-orbit orbit-two" aria-hidden="true"></div>
+        <div class="floating-stone stone-one" aria-hidden="true"></div>
+        <div class="floating-stone stone-two" aria-hidden="true"></div>
+        <div class="floating-stone stone-three" aria-hidden="true"></div>
+
+        <div class="mountains" aria-hidden="true">
+          <div class="mountain mountain-left"></div>
+          <div class="mountain mountain-mid"></div>
+          <div class="mountain mountain-right"></div>
+        </div>
+
+        <div class="paper-panel" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <strong>Blocky Outfit Studio</strong>
+        </div>
+
+        <section class="upload-panel" aria-label="Clothing upload controls">
+          <div class="panel-heading">
+            <p>Roblox Clothing Previewer</p>
+            <h1 id="page-title">Upload. Preview. Rotate.</h1>
+          </div>
+
+          <div class="drop-grid">
+            <label class="drop-card" for="shirtInput" id="shirtDrop">
+              <input id="shirtInput" type="file" accept="image/*" />
+              <span class="drop-icon">S</span>
+              <span class="drop-title">Upload Shirt</span>
+              <span class="drop-name" id="shirtName">PNG, JPG, WEBP</span>
+            </label>
+
+            <label class="drop-card" for="pantsInput" id="pantsDrop">
+              <input id="pantsInput" type="file" accept="image/*" />
+              <span class="drop-icon">P</span>
+              <span class="drop-title">Upload Pants</span>
+              <span class="drop-name" id="pantsName">PNG, JPG, WEBP</span>
+            </label>
+          </div>
+
+          <div class="actions">
+            <button class="control-button" id="resetView" type="button">Reset View</button>
+            <button class="control-button ghost" id="clearTextures" type="button">Clear</button>
+          </div>
+        </section>
+
+        <section class="viewer-card" aria-label="3D Roblox clothing preview">
+          <div id="viewer" class="viewer"></div>
+          <div class="viewer-status" id="viewerStatus">Loading 3D model</div>
+          <div class="viewer-hint">Drag to rotate</div>
+        </section>
+
+        <div class="forest" aria-hidden="true">
+          <span class="tree t1"></span>
+          <span class="tree t2"></span>
+          <span class="tree t3"></span>
+          <span class="tree t4"></span>
+          <span class="tree t5"></span>
+          <span class="tree t6"></span>
+          <span class="tree t7"></span>
+          <span class="tree t8"></span>
+          <span class="tree t9"></span>
+          <span class="tree t10"></span>
+          <span class="tree t11"></span>
+          <span class="tree t12"></span>
+          <span class="tree t13"></span>
+        </div>
+
+        <div class="ground">
+          <span class="ground-shadow"></span>
+          <span class="ground-edge"></span>
+        </div>
+
+        <aside class="tool-rail" aria-label="Preview notes">
+          <span>R6</span>
+          <span>Local files</span>
+          <span>No upload</span>
+        </aside>
+      </section>
+    </main>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

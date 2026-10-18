@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+        </style>
+        <link rel="stylesheet" href="style.css" />
+        <script src="main.js" type="module" defer></script>
+        <title>ATF Showcase Generator</title>
+    </head>
+    <body>
+        <header>
+            <h1 class="header__title">
+                After the Flash
+                <span>Showcase Generator</span>
+            </h1>
+        </header>
+        <main>
+            <canvas data-screen></canvas>
+            <div class="settings">
+                <h2 class="settings__title">Settings</h2>
+                <div class="setting">
+                    <p class="setting__name">
+                        Shirt: <span class="setting__display" data-display="shirt"></span>
+                    </p>
+                    <button
+                        class="setting__button"
+                        data-input-type="changeSetting"
+                        data-setting="shirt"
+                    >
+                        Upload
+                    </button>
+                </div>
+                <div class="setting">
+                    <p class="setting__name">
+                        Pants: <span class="setting__display" data-display="pants"></span>
+                    </p>
+                    <button
+                        class="setting__button"
+                        data-input-type="changeSetting"
+                        data-setting="pants"
+                    >
+                        Upload
+                    </button>
+                </div>
+                <div class="setting">
+                    <p class="setting__name">
+                        Template: <span class="setting__display" data-display="template"></span>
+                    </p>
+                    <button
+                        class="setting__button"
+                        data-input-type="changeSetting"
+                        data-setting="template"
+                    >
+                        Upload
+                    </button>
+                </div>
+                <div class="setting">
+                    <p class="setting__name">Color:</p>
+                    <input
+                        type="text"
+                        spellcheck="false"
+                        class="setting__text-input"
+                        data-display="color"
+                        data-input-type="changeSetting"
+                        data-setting="color"
+                    />
+                </div>
+                <div class="setting">
+                    <button
+                        class="setting__button setting__button--generate"
+                        data-input-type="generate"
+                    >
+                        Generate
+                    </button>
+                </div>
+            </div>
+            <div class="tutorial">
+                <h2 class="tutorial__title">How to use the template system</h2>
+                <p class="tutorial__text">
+                    In order to allow you to add only the sides of the showcase that you want, this
+                    tool uses a system which requires you to do some small modifications to your
+                    showcase:
+                </p>
+                <h3 class="tutorial__subtitle">Color Code</h3>
+                <p class="tutorial__text">
+                    This system involves a color code in which pixels of certain colors determine
+                    where you want a certain side of your showcase to appear (like the side, front
+                    or back). You will have to modify your template to include pixels with these
+                    colors that are located wherever you want that side to apppear.
+                    <strong
+                        >Keep in mind that no pixel can have these specific RGB values other than
+                        these ones.</strong
+                    >
+                </p>
+                <ol class="tutorial__list">
+                    <li class="tutorial__list__element">rgb(255, 0, 0) - Right side</li>
+                    <li class="tutorial__list__element">rgb(0, 255, 0) - Front</li>
+                    <li class="tutorial__list__element">rgb(0, 0, 255) - Back</li>
+                    <li class="tutorial__list__element">rgb(255, 255, 0) - Left side</li>
+                </ol>
+                <h3 class="tutorial__subtitle">Note</h3>
+                <p class="tutorial__text">
+                    Since this is hosted on Github I can't have the showcase download automatically
+                    or add a button that starts the download.
+                    <strong
+                        >You will have to manually right click and "save as" in order to download
+                        your showcase.</strong
+                    >
+                </p>
+            </div>
+            <!-- <p class="note">
+                NOTE: Since this is hosted on Github, I can't make the download start automatically
+                or add a button that does it. You will have to manually click and "save as" in order
+                to download the showcase.
+            </p> -->
+        </main>
+    </body>
+</html>
