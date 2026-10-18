@@ -3,90 +3,51 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Nocturne Designs 3D Roblox blocky clothing previewer." />
     <title>Nocturne Designs - 3D Previewer</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="stage">
-      <nav class="topbar" aria-label="Primary">
-        <a class="brand" href="./" aria-label="Nocturne Designs home">
-          <span class="brand-mark"></span>
-          <span>Nocturne Designs</span>
-        </a>
-        <div class="nav-line" aria-hidden="true"></div>
-        <div class="top-links" aria-label="Creator links">
-          <a href="#" target="_blank" rel="noreferrer">Discord</a>
-          <a href="#" target="_blank" rel="noreferrer">GitHub</a>
-        </div>
+      <nav class="topbar">
+        <a class="brand" href="./"><span class="brand-mark"></span><span>Nocturne Designs</span></a>
       </nav>
 
-      <section class="hero" aria-labelledby="page-title">
-        <div class="sky-orbit orbit-one" aria-hidden="true"></div>
-        <div class="sky-orbit orbit-two" aria-hidden="true"></div>
-        <div class="floating-stone stone-one" aria-hidden="true"></div>
-        <div class="floating-stone stone-two" aria-hidden="true"></div>
-        <div class="floating-stone stone-three" aria-hidden="true"></div>
-
-        <div class="mountains" aria-hidden="true">
-          <div class="mountain mountain-left"></div>
-          <div class="mountain mountain-mid"></div>
-          <div class="mountain mountain-right"></div>
-        </div>
-
-        <div class="paper-panel" aria-hidden="true">
-          <span></span><span></span><span></span><strong>Blocky Outfit Studio</strong>
-        </div>
-
-        <section class="upload-panel" aria-label="Clothing upload controls">
+      <section class="hero">
+        <!-- Uploads -->
+        <section class="upload-panel">
           <div class="panel-heading">
             <p>Nocturne Designs</p>
-            <h1 id="page-title">Upload. Preview. Rotate.</h1>
+            <h1>Upload. Preview. Rotate.</h1>
           </div>
-
           <div class="drop-grid">
             <label class="drop-card" for="shirtInput" id="shirtDrop">
               <input id="shirtInput" type="file" accept="image/*" data-setting="shirt" />
               <span class="drop-icon">S</span>
               <span class="drop-title">Upload Shirt</span>
-              <span class="drop-name" id="shirtName">PNG, JPG, WEBP</span>
             </label>
-
             <label class="drop-card" for="pantsInput" id="pantsDrop">
               <input id="pantsInput" type="file" accept="image/*" data-setting="pants" />
               <span class="drop-icon">P</span>
               <span class="drop-title">Upload Pants</span>
-              <span class="drop-name" id="pantsName">PNG, JPG, WEBP</span>
             </label>
           </div>
-
-          <div class="actions">
-            <button class="control-button" id="resetView" type="button">Reset View</button>
-            <button class="control-button ghost" id="clearTextures" type="button">Clear</button>
+          
+          <!-- Camera Presets -->
+          <div class="actions" style="flex-wrap: wrap;">
+            <button class="control-button" id="camFront" type="button">Front</button>
+            <button class="control-button" id="camBack" type="button">Back</button>
+            <button class="control-button" id="camLeft" type="button">Left</button>
+            <button class="control-button" id="camRight" type="button">Right</button>
+            <button class="control-button ghost" id="resetView" type="button">Reset</button>
           </div>
         </section>
 
-        <section class="viewer-card" aria-label="3D Roblox clothing preview">
+        <section class="viewer-card">
           <div id="viewer" class="viewer"></div>
           <div class="viewer-status" id="viewerStatus">Loading 3D model</div>
           <div class="viewer-hint">Drag to rotate</div>
         </section>
-
-        <div class="forest" aria-hidden="true">
-          <span class="tree t1"></span><span class="tree t2"></span><span class="tree t3"></span><span class="tree t4"></span><span class="tree t5"></span><span class="tree t6"></span><span class="tree t7"></span><span class="tree t8"></span><span class="tree t9"></span><span class="tree t10"></span><span class="tree t11"></span><span class="tree t12"></span><span class="tree t13"></span>
-        </div>
-
-        <div class="ground">
-          <span class="ground-shadow"></span>
-          <span class="ground-edge"></span>
-        </div>
-
-        <aside class="tool-rail" aria-label="Preview notes">
-          <span>R6</span><span>Local files</span><span>No upload</span>
-        </aside>
       </section>
     </main>
 
@@ -103,9 +64,7 @@
               const reader = new FileReader();
               reader.onload = (ev) => {
                   const role = input.getAttribute('data-setting');
-                  if (role) {
-                      window.parent.postMessage({ type: 'UPLOAD_IMAGE', role, base64: ev.target.result }, '*');
-                  }
+                  if (role) window.parent.postMessage({ type: 'UPLOAD_IMAGE', role, base64: ev.target.result }, '*');
               };
               reader.readAsDataURL(file);
           });
@@ -114,20 +73,24 @@
       window.addEventListener('message', (event) => {
           if (event.data.type === 'LOAD_IMAGE') {
               const { role, base64 } = event.data;
-              fetch(base64)
-                  .then(res => res.blob())
-                  .then(blob => {
-                      const file = new File([blob], `${role}.png`, { type: 'image/png' });
-                      const dt = new DataTransfer();
-                      dt.items.add(file);
-                      
-                      const input = document.getElementById(`${role}Input`);
-                      if (input) {
-                          input.files = dt.files;
-                          input.dispatchEvent(new Event('change', { bubbles: true }));
-                      }
-                  });
+              fetch(base64).then(res => res.blob()).then(blob => {
+                  const file = new File([blob], `${role}.png`, { type: 'image/png' });
+                  const dt = new DataTransfer();
+                  dt.items.add(file);
+                  const input = document.getElementById(`${role}Input`);
+                  if (input) {
+                      input.files = dt.files;
+                      input.dispatchEvent(new Event('change', { bubbles: true }));
+                  }
+              });
           }
+      });
+
+      window.addEventListener('load', () => {
+          setTimeout(() => {
+              const resetBtn = document.getElementById('resetView');
+              if (resetBtn) resetBtn.click();
+          }, 2000);
       });
     </script>
   </body>
