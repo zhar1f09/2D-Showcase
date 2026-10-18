@@ -64,9 +64,20 @@
             });
         });
 
+                let lastSyncedShirt = "";
+        let lastSyncedPants = "";
+
         window.addEventListener('message', (event) => {
             if (event.data.type === 'UPLOAD_IMAGE') {
                 const { role, base64 } = event.data;
+                
+                // STOP THE LOOP: If the image is the same, do nothing
+                if (role === 'shirt' && base64 === lastSyncedShirt) return;
+                if (role === 'pants' && base64 === lastSyncedPants) return;
+
+                if (role === 'shirt') lastSyncedShirt = base64;
+                if (role === 'pants') lastSyncedPants = base64;
+
                 localStorage.setItem(role, base64);
                 frames.forEach(frame => {
                     frame.contentWindow.postMessage({ type: 'LOAD_IMAGE', role, base64 }, '*');
